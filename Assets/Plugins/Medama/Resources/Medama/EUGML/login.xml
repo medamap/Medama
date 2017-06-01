@@ -1,0 +1,40 @@
+<?xml version='1.0'?>
+<uGUI xmlins='http://megamin.jp/ns/unity3d/ugui/eugml'>
+  <!-- ウインドウフォーム -->
+  <AddNode name='FormMain' sprite='resources://Medama/EUGML/UI001#Window001' layout='StretchStretch' top='8' bottom='8' left='8' right='8'>
+    <!-- タイトルバー -->
+    <AddNode name='TitleMain' sprite='resources://Medama/EUGML/UI001#Header001' layout='TopStretch' height='24' top='8' left='8' right='8' spritetype='Simple'>
+      <AddNode name='Text' layout='StretchStretch'>
+        <SetText textstring=' [■] SSH ログインテストウインドウ' color='white' alignment='MiddleLeft' />
+      </AddNode>
+    </AddNode>
+    <!-- 中身 -->
+    <AddNode name='GroupMain' top='40' bottom='8' left='8' right='8' sprite='resources://Medama/EUGML/UI001#Group001'>
+      <!-- 1段目 (ホスト) -->
+      <AddNode name='TextLabelHost' layout='TopLeft' width='100' height='30' top='8' left='8'>
+        <SetText textstring='HOST：' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode name='InputHost' layout='TopLeft' width='160' height='30' top='8' left='108' sprite='resources://Medama/EUGML/UI001#Text001'>
+        <SetInputField />
+      </AddNode>
+      <!-- 2段目 (ユーザー名) -->
+      <AddNode name='TextLabelUser' layout='TopLeft' width='100' height='30' top='48' left='8'>
+        <SetText textstring='USER：' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode name='InputUser' layout='TopLeft' width='160' height='30' top='48' left='108' sprite='resources://Medama/EUGML/UI001#Text001'>
+        <SetInputField />
+      </AddNode>
+      <!-- 3段目 (パスワード) -->
+      <AddNode name='TextLabelPassword' layout='TopLeft' width='100' height='30' top='88' left='8'>
+        <SetText textstring='PASSWORD：' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode name='InputPassword' layout='TopLeft' width='160' height='30' top='88' left='108' sprite='resources://Medama/EUGML/UI001#Text001'>
+        <SetInputField />
+      </AddNode>
+      <!-- 4段目 (ボタン) -->
+      <AddNode name='ButtonLogin' layout='TopLeft' width='160' height='30' top='128' left='8' sprite='resources://Medama/EUGML/UI001#Button003'>
+        <SetButton textButton='LOGIN' />
+      </AddNode>
+    </AddNode>
+  </AddNode>
+</uGUI>

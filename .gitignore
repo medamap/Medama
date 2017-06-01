@@ -4,6 +4,9 @@
 /[Bb]uild/
 /[Bb]uilds/
 /Assets/AssetStoreTools*
+/Assets/Plugins/Arbor*
+/Assets/Plugins/UniRx*
+/Assets/Scripts*
 
 # Visual Studio 2015 cache directory
 /.vs/
