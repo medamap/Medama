@@ -216,38 +216,68 @@ public class command_thread : MonoBehaviour {
         var dc = gameObject.MedamaUIParseXml(loginxml.text);
 
         // Get UI components.
-        var host = dc.Where(gopair => gopair.Value.name == "InputHost").FirstOrDefault().Value.GetComponent<InputField>();
-        var user = dc.Where(gopair => gopair.Value.name == "InputUser").FirstOrDefault().Value.GetComponent<InputField>();
-        var password = dc.Where(gopair => gopair.Value.name == "InputPassword").FirstOrDefault().Value.GetComponent<InputField>();
-        var button = dc.Where(gopair => gopair.Value.name == "ButtonLogin").FirstOrDefault().Value.GetComponent<Button>();
+        // * Caution: Null not checking *
+        var inputHost = dc
+            .Where(gopair => gopair.Value.name == "InputHost")
+            .First()
+            .Value
+            .GetComponent<InputField>();
 
-        // Regist command queue
+        var inputUser = dc
+            .Where(gopair => gopair.Value.name == "InputUser")
+            .First()
+            .Value
+            .GetComponent<InputField>();
+
+        var inputPassword = dc
+            .Where(gopair => gopair.Value.name == "InputPassword")
+            .First()
+            .Value
+            .GetComponent<InputField>();
+
+        var buttonLogin = dc
+            .Where(gopair => gopair.Value.name == "ButtonLogin")
+            .First()
+            .Value
+            .GetComponent<Button>();
+
+        // Regist command queue.
         commands.Enqueue("ps");
         commands.Enqueue("rpm -qa");
         commands.Enqueue("df -h");
 
-        // Button click event
-        button
+        // Button click event.
+        buttonLogin
             .OnClickAsObservable()
             .Subscribe(_ => {
-                ssh = new ObservableSSH(host: host.text, user: user.text, password: password.text);
-                // Monitor stdout
+                // Initialize SSH.
+                ssh = new ObservableSSH(
+                    host: inputHost.text,
+                    user: inputUser.text,
+                    password: inputPassword.text);
+
                 if (ssh.con.IsAuthenticated) {
+                    // Monitor stdout.
                     ssh
                         .stdOutSubject
                         .Subscribe(line => Debug.Log(line))
                         .AddTo(ssh.compositeDisposable);
-
+                    // Check stream status and send shell command.
                     ssh
                         .statusSubject
-                        .Where(status => status == ObservableSshStatus.EndOfStream && ssh.CheckBuffer("]$ ") && commands.Count > 0)
+                        .Where(status =>
+                            status == ObservableSshStatus.EndOfStream &&
+                            ssh.CheckBuffer("]$ ") &&
+                            commands.Count > 0)
                         .Subscribe(status => ssh.writeSshSubject.OnNext(commands.Dequeue()));
                 }
-                button.enabled = false;
+                // Double login prevention.
+                buttonLogin.enabled = false;
             })
             .AddTo(this);
     }
 
+    // The thread version require dispose SSH on destroy.
     private void OnDestroy() {
         if (ssh != null) {
             ssh.Dispose();
@@ -278,35 +308,64 @@ public class command_microcoroutine : MonoBehaviour {
         var dc = gameObject.MedamaUIParseXml(loginxml.text);
 
         // Get UI components.
-        var host = dc.Where(gopair => gopair.Value.name == "InputHost").FirstOrDefault().Value.GetComponent<InputField>();
-        var user = dc.Where(gopair => gopair.Value.name == "InputUser").FirstOrDefault().Value.GetComponent<InputField>();
-        var password = dc.Where(gopair => gopair.Value.name == "InputPassword").FirstOrDefault().Value.GetComponent<InputField>();
-        var button = dc.Where(gopair => gopair.Value.name == "ButtonLogin").FirstOrDefault().Value.GetComponent<Button>();
+        // * Caution: Null not checking *
+        var inputHost = dc
+            .Where(gopair => gopair.Value.name == "InputHost")
+            .First()
+            .Value
+            .GetComponent<InputField>();
 
-        // Regist command queue
+        var inputUser = dc
+            .Where(gopair => gopair.Value.name == "InputUser")
+            .First()
+            .Value
+            .GetComponent<InputField>();
+
+        var inputPassword = dc
+            .Where(gopair => gopair.Value.name == "InputPassword")
+            .First()
+            .Value
+            .GetComponent<InputField>();
+
+        var buttonLogin = dc
+            .Where(gopair => gopair.Value.name == "ButtonLogin")
+            .First()
+            .Value
+            .GetComponent<Button>();
+
+        // Regist command queue.
         commands.Enqueue("ps");
         commands.Enqueue("rpm -qa");
         commands.Enqueue("df -h");
 
-        // Button click event
-        button
+        // Button click event.
+        buttonLogin
             .OnClickAsObservable()
             .Subscribe(_ => {
+                // Initialize SSH.
                 ssh = gameObject.AddComponent<ObservableSSHMonoBehaviour>();
-                ssh.InitializeAndStart(host: host.text, user: user.text, password: password.text);
-                // Monitor stdout
+                ssh.InitializeAndStart(
+                    host: inputHost.text,
+                    user: inputUser.text,
+                    password: inputPassword.text);
+                
                 if (ssh.con.IsAuthenticated) {
+                    // Monitor stdout.
                     ssh
                         .stdOutSubject
                         .Subscribe(line => Debug.Log(line))
                         .AddTo(this);
-
+                    // Check stream status and send shell command.
                     ssh
                         .statusSubject
-                        .Where(status => status == ObservableSshStatus.EndOfStream && ssh.CheckBuffer("]$ ") && commands.Count > 0)
+                        .Where(status =>
+                            status == ObservableSshStatus.EndOfStream &&
+                            ssh.CheckBuffer("]$ ") &&
+                            commands.Count > 0)
                         .Subscribe(status => ssh.writeSshSubject.OnNext(commands.Dequeue()));
                 }
-                button.enabled = false;
+                // Double login prevention.
+                buttonLogin.enabled = false;
             })
             .AddTo(this);
     }
