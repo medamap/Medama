@@ -6,7 +6,6 @@
 /Assets/AssetStoreTools*
 /Assets/Plugins/Arbor*
 /Assets/Plugins/UniRx*
-/Assets/Plugins/Renci.SshNet*
 /Assets/Scripts*
 
 # Visual Studio 2015 cache directory
