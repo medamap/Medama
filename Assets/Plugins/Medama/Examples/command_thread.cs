@@ -11,18 +11,22 @@ public class command_thread : MonoBehaviour {
     public Queue<string> commands = new Queue<string>();
 
     void Start() {
+        // Create UI.
         var loginxml = Resources.Load<TextAsset>("Medama/EUGML/login");
         var dc = gameObject.MedamaUIParseXml(loginxml.text);
 
+        // Get UI components.
         var host = dc.Where(gopair => gopair.Value.name == "InputHost").FirstOrDefault().Value.GetComponent<InputField>();
         var user = dc.Where(gopair => gopair.Value.name == "InputUser").FirstOrDefault().Value.GetComponent<InputField>();
         var password = dc.Where(gopair => gopair.Value.name == "InputPassword").FirstOrDefault().Value.GetComponent<InputField>();
         var button = dc.Where(gopair => gopair.Value.name == "ButtonLogin").FirstOrDefault().Value.GetComponent<Button>();
 
+        // Regist command queue
         commands.Enqueue("ps");
         commands.Enqueue("rpm -qa");
         commands.Enqueue("df -h");
 
+        // Button click event
         button
             .OnClickAsObservable()
             .Subscribe(_ => {
@@ -39,7 +43,7 @@ public class command_thread : MonoBehaviour {
                         .Where(status => status == ObservableSshStatus.EndOfStream && ssh.CheckBuffer("]$ ") && commands.Count > 0)
                         .Subscribe(status => ssh.writeSshSubject.OnNext(commands.Dequeue()));
                 }
-
+                button.enabled = false;
             })
             .AddTo(this);
     }

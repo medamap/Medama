@@ -1,4 +1,12 @@
-<?xml version='1.0'?>
+﻿using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+using Medama.EUGML;
+
+public class eugml : MonoBehaviour {
+    void Start () {
+        // Create UI from XML.
+        var dc = gameObject.MedamaUIParseXml(@"<?xml version='1.0'?>
 <uGUI xmlins='http://megamin.jp/ns/unity3d/ugui/eugml'>
   <!-- Window form -->
   <AddNode name='FormMain' sprite='resources://Medama/EUGML/UI001#Window001'
@@ -44,4 +52,12 @@
       </AddNode>
     </AddNode>
   </AddNode>
-</uGUI>
+</uGUI>");
+
+        // Get UI components.
+        var inputHost = dc.Where(gopair => gopair.Value.name == "InputHost").First().Value.GetComponent<InputField>();
+        var inputUser = dc.Where(gopair => gopair.Value.name == "InputUser").First().Value.GetComponent<InputField>();
+        var inputPassword = dc.Where(gopair => gopair.Value.name == "InputPassword").First().Value.GetComponent<InputField>();
+        var buttonLogin = dc.Where(gopair => gopair.Value.name == "ButtonLogin").First().Value.GetComponent<Button>();
+    }
+}
