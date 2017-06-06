@@ -31,6 +31,8 @@ namespace Medama.ObservableSsh
             string host = Const.host,
             string user = Const.user,
             string password = Const.password,
+            string keyfile = Const.keyfile,
+            string passphrase = Const.passphrase,
             int port = Const.port,
             string terminalname = Const.terminalname,
             uint columns = Const.columns,
@@ -46,7 +48,16 @@ namespace Medama.ObservableSsh
             statusSubject = new Subject<ObservableSshStatus>();
 
             // Initialize ssh connection
-            con = new ConnectionInfo(host, port, user, new AuthenticationMethod[] { new PasswordAuthenticationMethod(user, password) });
+            if (!string.IsNullOrEmpty(keyfile) && !string.IsNullOrEmpty(passphrase)) {
+                con = new ConnectionInfo(host, port, user, new AuthenticationMethod[] {
+                    new PasswordAuthenticationMethod(user, password),
+                    new PrivateKeyAuthenticationMethod(user, new PrivateKeyFile[]{new PrivateKeyFile(keyfile, passphrase)})
+                });
+            } else if (!string.IsNullOrEmpty(keyfile)) {
+                con = new PrivateKeyConnectionInfo(host, port, user, new PrivateKeyFile[] { new PrivateKeyFile(keyfile) });
+            } else {
+                con = new ConnectionInfo(host, port, user, new AuthenticationMethod[] { new PasswordAuthenticationMethod(user, password) });
+            }
             sshClient = new SshClient(con);
 
             try {

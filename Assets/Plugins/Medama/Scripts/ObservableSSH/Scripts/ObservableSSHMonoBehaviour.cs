@@ -29,6 +29,8 @@ namespace Medama.ObservableSsh
             string host = Const.host,
             string user = Const.user,
             string password = Const.password,
+            string keyfile = Const.keyfile,
+            string passphrase = Const.passphrase,
             int port = Const.port,
             string terminalname = Const.terminalname,
             uint columns = Const.columns,
@@ -43,6 +45,8 @@ namespace Medama.ObservableSsh
                 host: host,
                 user: user,
                 password: password,
+                keyfile: keyfile,
+                passphrase: passphrase,
                 port: port,
                 terminalname: terminalname,
                 columns: columns,
@@ -52,9 +56,11 @@ namespace Medama.ObservableSsh
                 buffersize: buffersize,
                 initialize: false);
 
-            if (!con.IsAuthenticated) {
-                ssh.Dispose();
-                ssh = null;
+            if (con == null || !con.IsAuthenticated) {
+                if (ssh != null) {
+                    ssh.Dispose();
+                    ssh = null;
+                }
                 return false;
             }
 

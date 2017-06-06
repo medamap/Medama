@@ -13,6 +13,8 @@
         public const string host = null;
         public const string user = null;
         public const string password = null;
+        public const string keyfile = null;
+        public const string passphrase = null;
         public const int port = 22;
         public const string terminalname = "console";
         public const uint columns = 80;
