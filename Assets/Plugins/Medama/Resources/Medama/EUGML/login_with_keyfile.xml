@@ -1,0 +1,87 @@
+<?xml version='1.0'?>
+<uGUI xmlins='http://megamin.jp/ns/unity3d/ugui/eugml'>
+  
+  <!-- Window form -->
+  <AddNode
+    name='FormMain'
+    sprite='resources://Medama/EUGML/UI001#Window001'
+    layout='StretchStretch' top='8' bottom='8' left='8' right='8'>
+
+    <!-- Title bar -->
+    <AddNode
+      name='TitleMain' sprite='resources://Medama/EUGML/UI001#Header001'
+      layout='TopStretch' height='24' top='8' left='8' right='8' spritetype='Simple'>
+      <AddNode name='Text' layout='StretchStretch'>
+        <SetText textstring=' [__] TEST SSH LOGIN' color='white' alignment='MiddleLeft' />
+      </AddNode>
+    </AddNode>
+    
+    <!-- Contents -->
+    <AddNode
+      name='GroupMain' sprite='resources://Medama/EUGML/UI001#Group001'
+      top='40' bottom='8' left='8' right='8'>
+      
+      <!-- Input host address -->
+      <AddNode
+        name='TextLabelHost' layout='TopLeft' width='100' height='30' top='8' left='8'>
+        <SetText textstring='HOST : ' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode
+        name='InputHost' sprite='resources://Medama/EUGML/UI001#Text001'
+        layout='TopLeft' width='160' height='30' top='8' left='128'>
+        <SetInputField />
+      </AddNode>
+      
+      <!-- Input user name -->
+      <AddNode
+        name='TextLabelUser' layout='TopLeft' width='100' height='30' top='48' left='8'>
+        <SetText textstring='USER : ' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode
+        name='InputUser' sprite='resources://Medama/EUGML/UI001#Text001'
+        layout='TopLeft' width='160' height='30' top='48' left='128'>
+        <SetInputField />
+      </AddNode>
+      
+      <!-- Input password -->
+      <AddNode
+        name='TextLabelPassword' layout='TopLeft' width='100' height='30' top='88' left='8'>
+        <SetText textstring='PASSWORD : ' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode
+        name='InputPassword' sprite='resources://Medama/EUGML/UI001#Text001'
+        layout='TopLeft' width='160' height='30' top='88' left='128'>
+        <SetInputField />
+      </AddNode>
+
+      <!-- Input key file path -->
+      <AddNode
+        name='TextLabelKeyfile' layout='TopLeft' width='100' height='30' top='128' left='8'>
+        <SetText textstring='Keyfile : ' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode
+        name='InputKeyfile' sprite='resources://Medama/EUGML/UI001#Text001'
+        layout='TopLeft' width='240' height='30' top='128' left='128'>
+        <SetInputField />
+      </AddNode>
+
+      <!-- Input passphrase -->
+      <AddNode
+        name='TextLabelPassphrase' layout='TopLeft' width='100' height='30' top='168' left='8'>
+        <SetText textstring='PASSPHRASE : ' alignment='MiddleLeft' />
+      </AddNode>
+      <AddNode
+        name='InputPassphrase' sprite='resources://Medama/EUGML/UI001#Text001'
+        layout='TopLeft' width='160' height='30' top='168' left='128'>
+        <SetInputField />
+      </AddNode>
+
+      <!-- Submit button -->
+      <AddNode
+        name='ButtonLogin' sprite='resources://Medama/EUGML/UI001#Button003'
+        layout='TopLeft' width='160' height='30' top='208' left='8'>
+        <SetButton textButton='LOGIN' />
+      </AddNode>
+    </AddNode>
+  </AddNode>
+</uGUI>
