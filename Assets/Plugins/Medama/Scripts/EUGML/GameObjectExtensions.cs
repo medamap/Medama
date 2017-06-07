@@ -236,6 +236,7 @@ namespace Medama.EUGML {
                     else if (pi.Value.ParameterType == typeof(ScrollRect.MovementType)) { parameters[index] = value.ToMovementType(); } // MovementType
                     else if (pi.Value.ParameterType == typeof(bool) && bool.TryParse(value, out boolValue)) { parameters[index] = boolValue; } // bool
                     else if (pi.Value.ParameterType == typeof(ContentSizeFitter.FitMode)) { parameters[index] = value; } // ContentSizeFitter.FitMode
+                    else if (pi.Value.ParameterType == typeof(InputField.ContentType)) { parameters[index] = value.ToContentType(); } // InputField.ContentType
                     else { Debug.LogWarningFormat("Parameter type {0} is not implements in {1}", pi.Value.ParameterType.FullName, xElement.ToString()); }
                 }
                 index++;
@@ -842,7 +843,8 @@ namespace Medama.EUGML {
             float top = 7,
             float bottom = 6,
             float left = 10,
-            float right = 10
+            float right = 10,
+            InputField.ContentType contentType = InputField.ContentType.Standard
         ) {
             var inputField = node.GetComponent<InputField>();
             if (inputField == null) {
@@ -859,6 +861,7 @@ namespace Medama.EUGML {
 
             inputField.textComponent = text;
             inputField.placeholder = placeholder;
+            inputField.contentType = contentType;
 
             return node;
         }

@@ -215,5 +215,28 @@ namespace Medama.EUGML {
                 default: Debug.LogWarningFormat("Invalid FitMode {0}", value); return ContentSizeFitter.FitMode.PreferredSize;
             }
         }
+
+        /// <summary>
+        /// Convert string to InputField.ContentType
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static InputField.ContentType ToContentType(
+            this string value
+        ) {
+            switch (value.ToLower()) {
+                case "alphanumeric": return InputField.ContentType.Alphanumeric;
+                case "autocorrected": return InputField.ContentType.Autocorrected;
+                case "custom": return InputField.ContentType.Custom;
+                case "decimalnumber": return InputField.ContentType.DecimalNumber;
+                case "emailaddress": return InputField.ContentType.EmailAddress;
+                case "integernumber": return InputField.ContentType.IntegerNumber;
+                case "name": return InputField.ContentType.Name;
+                case "password": return InputField.ContentType.Password;
+                case "pin": return InputField.ContentType.Pin;
+                case "standard": return InputField.ContentType.Standard;
+                default: Debug.LogWarningFormat("Invalid ContentType {0}", value); return InputField.ContentType.Standard;
+            }
+        }
     }
 }

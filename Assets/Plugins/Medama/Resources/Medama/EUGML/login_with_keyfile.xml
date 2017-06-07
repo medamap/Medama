@@ -51,7 +51,7 @@
       <AddNode
         name='InputPassword' sprite='resources://Medama/EUGML/UI001#Text001'
         layout='TopLeft' width='160' height='30' top='88' left='128'>
-        <SetInputField />
+        <SetInputField contentType='Password' />
       </AddNode>
 
       <!-- Input key file path -->
@@ -73,7 +73,7 @@
       <AddNode
         name='InputPassphrase' sprite='resources://Medama/EUGML/UI001#Text001'
         layout='TopLeft' width='160' height='30' top='168' left='128'>
-        <SetInputField />
+        <SetInputField contentType='Password' />
       </AddNode>
 
       <!-- Submit button -->
