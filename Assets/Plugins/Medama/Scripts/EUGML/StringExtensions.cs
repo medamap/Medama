@@ -207,7 +207,7 @@ namespace Medama.EUGML {
                 case "stretchleft": return LayoutType.StretchLeft;
                 case "stretchstretch": return LayoutType.StretchStretch;
                 case "stretchright": return LayoutType.StretchRight;
-                case "bottomleft": return LayoutType.BottomStretch;
+                case "bottomleft": return LayoutType.BottomLeft;
                 case "bottomstretch": return LayoutType.BottomStretch;
                 case "bottomright": return LayoutType.BottomRight;
                 case "topcenter": return LayoutType.TopCenter;

@@ -252,8 +252,8 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// ## 拡張メソッド用パラメータを生成する
-        /// ## Create parameters of extension method
+        /// ## XMLノード内の属性をパラメータに変換し、拡張メソッドをコールする
+        /// ## Convert attributes in the XML node to parameters and call extension methods.
         /// </summary>
         private static GameObject MedamaUIInvokeMethod(this GameObject node, XElement xElement, string methodname) {
 
@@ -318,41 +318,6 @@ namespace Medama.EUGML {
             parameters[0] = node;
 
             return (GameObject)methodinfo.Invoke(node, parameters);
-        }
-
-        /// <summary>
-        /// Set property
-        /// </summary>
-        private static GameObject MedamaUISetPropertyFromXml<T>(this GameObject node, T component, XElement xElement) {
-            foreach (var attribute in xElement.Attributes()) {
-                var key = attribute.Name.ToString();
-                var value = attribute.Value.ToString();
-                var property = component.GetType().GetProperty(key, BindingFlags.Public | BindingFlags.Instance);
-                if (property == null) {
-                    Debug.LogWarning(string.Format("Attribute {0} is not found in {1} (value={2}", key, component.ToString(), value));
-                    continue;
-                }
-
-                int iValue = 0;
-                long lValue = 0;
-                float fValue = 0;
-                double dValue = 0;
-
-                if (property.PropertyType == typeof(int) && int.TryParse(value, out iValue)) { property.SetValue(component, iValue, null); } // int
-                else if (property.PropertyType == typeof(long) && long.TryParse(value, out lValue)) { property.SetValue(component, lValue, null); } // long
-                else if (property.PropertyType == typeof(float) && float.TryParse(value, out fValue)) { property.SetValue(component, fValue, null); } // float
-                else if (property.PropertyType == typeof(double) && double.TryParse(value, out dValue)) { property.SetValue(component, dValue, null); } // double
-                else if (property.PropertyType == typeof(string)) { property.SetValue(component, value, null); } // string
-                else if (property.PropertyType == typeof(Vector2)) { property.SetValue(component, value.ToVector2(), null); } // Vector2
-                else if (property.PropertyType == typeof(Vector3)) { property.SetValue(component, Vector3.zero, null); } // Vector3
-                else if (property.PropertyType == typeof(Texture2D)) { property.SetValue(component, null, null); } // Texture2D
-                else if (property.PropertyType == typeof(Texture3D)) { property.SetValue(component, null, null); } // Texture3D
-                else if (property.PropertyType == typeof(Sprite)) { property.SetValue(component, MedamaUILoadSprite(value), null); } // Sprite
-                else if (property.PropertyType == typeof(Image.Type)) { property.SetValue(component, value.ToImageType(), null); } // Image.Type
-                else if (property.PropertyType == typeof(Color)) { property.SetValue(component, value.ToImageType(), null); } // Image.Type
-                else if (property.PropertyType == typeof(GameObject)) { property.SetValue(component, null, null); } // GameObject
-            }
-            return node;
         }
 
         /// <summary>
@@ -467,7 +432,8 @@ namespace Medama.EUGML {
             float right = 0,
             string sprite = "",
             Image.Type spritetype = Image.Type.Sliced,
-            LayoutType pivot = LayoutType.NoUse
+            LayoutType pivot = LayoutType.NoUse,
+            bool active = true
         ) {
             Vector2 anchorMin = Vector2.zero;
             Vector2 anchorMax = Vector2.zero;
@@ -504,9 +470,13 @@ namespace Medama.EUGML {
                 case LayoutType.BottomRight: pivot_set = bottom_right; break;
             }
 
-            return string.IsNullOrEmpty(sprite)
+            var newnode = string.IsNullOrEmpty(sprite)
                 ? parent.MedamaUIAddNode(name, anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot_set)
                 : parent.MedamaUIAddNode(name, anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot_set).MedamaUISetCanvasRender().MedamaUISetImage(MedamaUILoadSprite(sprite), spritetype);
+
+            newnode.SetActive(active);
+
+            return newnode;
         }
 
         /// <summary>
