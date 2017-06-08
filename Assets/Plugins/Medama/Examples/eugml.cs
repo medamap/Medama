@@ -74,6 +74,7 @@ public class eugml : MonoBehaviour {
 
         // Get UI components.
         // * Caution: Null not checking *
+#pragma warning disable 219
         var inputHost = dc
             .Where(gopair => gopair.Value.name == "InputHost")
             .First()
@@ -97,5 +98,6 @@ public class eugml : MonoBehaviour {
             .First()
             .Value
             .GetComponent<Button>();
+#pragma warning restore 219
     }
 }

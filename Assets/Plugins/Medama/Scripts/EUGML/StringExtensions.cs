@@ -4,12 +4,32 @@ using System.Linq;
 
 namespace Medama.EUGML {
 
+    /// <summary>
+    /// # Stringの拡張メソッドを定義する
+    /// # Define extension method of String.
+    /// - 主にXMLをパースする際に使用される
+    /// - It is mainly used when parsing XML
+    /// </summary>
     public static partial class StringExtensions {
 
         /// <summary>
-        /// Convert string to Color
+        /// ## Convert string to Color
         /// </summary>
-        /// <param name="value">black|blue|clear|cyan|gray|green|grey|magenta|red|white|yellow|(r,g,b)|(r,g,b,a)</param>
+        /// <param name="value">
+        /// - black
+        /// - blue
+        /// - clear
+        /// - cyan
+        /// - gray
+        /// - green
+        /// - grey
+        /// - magenta
+        /// - red
+        /// - white
+        /// - yellow
+        /// - (r,g,b)
+        /// - (r,g,b,a)
+        /// </param>
         /// <returns></returns>
         public static Color ToColor(
             this string value
@@ -40,9 +60,14 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to Image.Type
+        /// ## Convert string to Image.Type
         /// </summary>
-        /// <param name="value">filled|simple|sliced|tiled</param>
+        /// <param name="value">
+        /// - filled
+        /// - simple
+        /// - sliced
+        /// - tiled
+        /// </param>
         /// <returns></returns>
         public static Image.Type ToImageType(
             this string value
@@ -60,16 +85,22 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to Vector2
+        /// ## Convert string to Vector2
         /// </summary>
-        /// <param name="value">zero|up|right|one|(x,y)</param>
+        /// <param name="value">
+        /// - zero
+        /// - up
+        /// - right
+        /// - one
+        /// - (x,y)
+        /// </param>
         /// <returns></returns>
         public static Vector2 ToVector2(
             this string value
         ) {
             Vector2 retValue = Vector2.zero;
 
-            switch (value) {
+            switch (value.ToLower()) {
                 case "zero": retValue = Vector2.zero; break;
                 case "up": retValue = Vector2.up; break;
                 case "right": retValue = Vector2.right; break;
@@ -87,16 +118,26 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to Vector3
+        /// ## Convert string to Vector3
         /// </summary>
-        /// <param name="value">zero|one|forward|back|left|right|up|down|(x,y,z)</param>
+        /// <param name="value">
+        /// - zero
+        /// - one
+        /// - forward
+        /// - back
+        /// - left
+        /// - right
+        /// - up
+        /// - down
+        /// - (x,y,z)
+        /// </param>
         /// <returns></returns>
         public static Vector3 ToVector3(
             this string value
         ) {
             Vector3 retValue = Vector3.zero;
             // zero one forward back left right up down
-            switch (value) {
+            switch (value.ToLower()) {
                 case "zero": retValue = Vector3.zero; break;
                 case "one": retValue = Vector3.one; break;
                 case "up": retValue = Vector3.up; break;
@@ -117,7 +158,7 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert float list to float array
+        /// ## Convert float list to float array
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -131,41 +172,67 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to LayoutType
+        /// ## Convert string to LayoutType
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">
+        /// - topleft
+        /// - topstretch
+        /// - topright
+        /// - stretchleft
+        /// - stretchstretch
+        /// - stretchright
+        /// - stretchright
+        /// - bottomleft
+        /// - bottomstretch
+        /// - bottomright
+        /// - topcenter
+        /// - bottomcenter
+        /// - centercenter
+        /// - centerleft
+        /// - centerright
+        /// </param>
         /// <returns></returns>
         public static LayoutType ToLayoutType(
             this string value
         ) {
-            switch (value) {
-                case "NoUse": return LayoutType.NoUse;
-                case "ScreenFit": return LayoutType.ScreenFit;
-                case "ScreenFitWithScrollBarBoth": return LayoutType.ScreenFitWithScrollBarBoth;
-                case "ParentFit": return LayoutType.ParentFit;
-                case "ParentFitWithScrollBarBoth": return LayoutType.ParentFitWithScrollBarBoth;
-                case "TopLeft": return LayoutType.TopLeft;
-                case "TopStretch": return LayoutType.TopStretch;
-                case "TopRight": return LayoutType.TopRight;
-                case "StretchLeft": return LayoutType.StretchLeft;
-                case "StretchStretch": return LayoutType.StretchStretch;
-                case "StretchRight": return LayoutType.StretchRight;
-                case "BottomLeft": return LayoutType.BottomStretch;
-                case "BottomStretch": return LayoutType.BottomStretch;
-                case "BottomRight": return LayoutType.BottomRight;
-                case "TopCenter": return LayoutType.TopCenter;
-                case "BottomCenter": return LayoutType.BottomCenter;
-                case "CenterCenter": return LayoutType.CenterCenter;
-                case "CenterLeft": return LayoutType.CenterLeft;
-                case "CenterRight": return LayoutType.CenterRight;
+            switch (value.ToLower()) {
+                case "nouse": return LayoutType.NoUse;
+                case "screenfit": return LayoutType.ScreenFit;
+                case "screenfitwithscrollbarboth": return LayoutType.ScreenFitWithScrollBarBoth;
+                case "parentfit": return LayoutType.ParentFit;
+                case "parentfitwithscrollbarboth": return LayoutType.ParentFitWithScrollBarBoth;
+                case "topleft": return LayoutType.TopLeft;
+                case "topstretch": return LayoutType.TopStretch;
+                case "topright": return LayoutType.TopRight;
+                case "stretchleft": return LayoutType.StretchLeft;
+                case "stretchstretch": return LayoutType.StretchStretch;
+                case "stretchright": return LayoutType.StretchRight;
+                case "bottomleft": return LayoutType.BottomStretch;
+                case "bottomstretch": return LayoutType.BottomStretch;
+                case "bottomright": return LayoutType.BottomRight;
+                case "topcenter": return LayoutType.TopCenter;
+                case "bottomcenter": return LayoutType.BottomCenter;
+                case "centercenter": return LayoutType.CenterCenter;
+                case "centerleft": return LayoutType.CenterLeft;
+                case "centerright": return LayoutType.CenterRight;
                 default: Debug.LogWarningFormat("Invalid Layout {0}", value); return LayoutType.NoUse;
             }
         }
 
         /// <summary>
-        /// Convert string to TextAnchor
+        /// ## Convert string to TextAnchor
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">
+        /// - upperleft
+        /// - uppercenter
+        /// - upperright
+        /// - middleleft
+        /// - middlecenter
+        /// - middleright
+        /// - lowerleft
+        /// - lowercenter
+        /// - lowerright
+        /// </param>
         /// <returns></returns>
         public static TextAnchor ToTextAnchor(
             this string value
@@ -185,9 +252,13 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to ScrollRect.MovementType
+        /// ## Convert string to ScrollRect.MovementType
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">
+        /// - clamped
+        /// - elastic
+        /// - unrestricted
+        /// </param>
         /// <returns></returns>
         public static ScrollRect.MovementType ToMovementType(
             this string value
@@ -201,9 +272,13 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to ContentSizeFitter.FitMode
+        /// ## Convert string to ContentSizeFitter.FitMode
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">
+        /// - minsize
+        /// - preferredsize
+        /// - unconstrained
+        /// </param>
         /// <returns></returns>
         public static ContentSizeFitter.FitMode ToFitMode(
             this string value
@@ -217,9 +292,20 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Convert string to InputField.ContentType
+        /// ## Convert string to InputField.ContentType
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">
+        /// - alphanumeric
+        /// - autocorrected
+        /// - custom
+        /// - decimalnumber
+        /// - emailaddress
+        /// - integernumber
+        /// - name
+        /// - password
+        /// - pin
+        /// - standard
+        /// </param>
         /// <returns></returns>
         public static InputField.ContentType ToContentType(
             this string value

@@ -2,8 +2,9 @@
 using UnityEngine;
 using UniRx;
 using Arbor;
+using Medama.ObservableSsh;
 
-namespace Medama.ObservableSsh
+namespace Medama.Arbor
 {
     public class ObservableSSHInitializeBehaviour : StateBehaviour
     {

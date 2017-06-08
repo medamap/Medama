@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -17,28 +19,114 @@ namespace Medama.EUGML {
         Both
     }
 
+    /// <summary>
+    /// # EUGML独自のレイアウト指定
+    /// # EUGML's own layout specification
+    /// - RectTransform の anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot の設定方法を指定する
+    /// - Specify how to set anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot of RectTransform.
+    /// </summary>
     public enum LayoutType {
+        /// <summary>
+        /// - 何も設定しない
+        /// - Not specify anything.
+        /// </summary>
         NoUse,
+        /// <summary>
+        /// - 未使用
+        /// - No use.
+        /// </summary>
         ScreenFit,
+        /// <summary>
+        /// - 未使用
+        /// - No use.
+        /// </summary>
         ScreenFitWithScrollBarBoth,
+        /// <summary>
+        /// - 未使用
+        /// - No use.
+        /// </summary>
         ParentFit,
+        /// <summary>
+        /// - 未使用
+        /// - No use.
+        /// </summary>
         ParentFitWithScrollBarBoth,
+        /// <summary>
+        /// - アンカーとピボットを左上に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Top Left. Enable Width and Height.
+        /// </summary>
         TopLeft,
+        /// <summary>
+        /// - アンカーを左上と右上に設定し、ストレッチを左右に設定
+        /// - Set the anchor from Top Left to Top Right. Set stretch Left and Right.
+        /// </summary>
         TopStretch,
+        /// <summary>
+        /// - アンカーとピボットを右上に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Top Right. Enable Width and Height.
+        /// </summary>
         TopRight,
+        /// <summary>
+        /// - アンカーを左下から左上に設定し、ストレッチを上下に設定
+        /// - Set the anchor from Bottom Left to Top Left. Set stretch Bottom and Top.
+        /// </summary>
         StretchLeft,
+        /// <summary>
+        /// - ストレッチを上下左右に設定<br />
+        /// - Set stretch Bottom, Top, Left and Right.
+        /// </summary>
         StretchStretch,
+        /// <summary>
+        /// - アンカーを右下から右上に設定し、ストレッチを上下に設定
+        /// - Set the anchor from Bottom Right to Top Right. Set stretch Bottom and Top.
+        /// </summary>
         StretchRight,
+        /// <summary>
+        /// - アンカーとピボットを左下に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Bottom Left. Enable Width and Height.
+        /// </summary>
         BottomLeft,
+        /// <summary>
+        /// - アンカーを左下と右下に設定し、ストレッチを左右に設定
+        /// - Set the anchor from Bottom Left to Bottom Right. Set stretch Left and Right.
+        /// </summary>
         BottomStretch,
+        /// <summary>
+        /// - アンカーとピボットを右下に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Bottom Right. Enable Width and Height.
+        /// </summary>
         BottomRight,
+        /// <summary>
+        /// - アンカーとピボットを上段の中央に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Top Center. Enable Width and Height.
+        /// </summary>
         TopCenter,
+        /// <summary>
+        /// - アンカーとピボットを下段の中央に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Bottom Center. Enable Width and Height.
+        /// </summary>
         BottomCenter,
+        /// <summary>
+        /// - アンカーとピボットを中央に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Center Center. Enable Width and Height.
+        /// </summary>
         CenterCenter,
+        /// <summary>
+        /// - アンカーとピボットを中央の左に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Center Left. Enable Width and Height.
+        /// </summary>
         CenterLeft,
+        /// <summary>
+        /// - アンカーとピボットを中央の右に設定し、縦横のサイズを指定可能に設定
+        /// - Set anchor and pivot to Center Right. Enable Width and Height.
+        /// </summary>
         CenterRight
     }
 
+    /// <summary>
+    /// # GameObjectの拡張メソッドを定義する
+    /// # Define extension method of GameObject.
+    /// </summary>
     public static partial class GameObjectExtensions {
 
         private static readonly Vector2 top_left = new Vector2(0f, 1f);
@@ -52,17 +140,12 @@ namespace Medama.EUGML {
         private static readonly Vector2 bottom_right = new Vector2(1f, 0f);
         private static readonly string _toplevel_resource = "___TLR___"; // Top Level Resource
 
-        private static Type tGameObject = typeof(GameObject);
         private static Dictionary<string, MethodInfo> dcMethodInfo = new Dictionary<string, MethodInfo>();
 
-
         /// <summary>
-        /// 複数の拡張メソッド取得
+        /// Get extension methods
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="extensionsAssembly"></param>
-        /// <returns></returns>
-        public static IEnumerable<MethodInfo> GetExtensionMethods(this Type type, Assembly extensionsAssembly) {
+        private static IEnumerable<MethodInfo> GetExtensionMethods(this Type type, Assembly extensionsAssembly) {
             var query = from t in extensionsAssembly.GetTypes()
                         where !t.IsGenericType && !t.IsNested
                         from m in t.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
@@ -74,13 +157,9 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// 拡張メソッド取得
+        /// Get extension method
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="extensionsAssembly"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static MethodInfo GetExtensionMethod(this Type type, string name) {
+        private static MethodInfo GetExtensionMethod(this Type type, string name) {
             if (dcMethodInfo.ContainsKey(name)) {
                 return dcMethodInfo[name];
             }
@@ -89,14 +168,9 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// 拡張メソッド取得
+        /// Get extension method
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="extensionsAssembly"></param>
-        /// <param name="name"></param>
-        /// <param name="types"></param>
-        /// <returns></returns>
-        public static MethodInfo GetExtensionMethod(this Type type, Assembly extensionsAssembly, string name, Type[] types) {
+        private static MethodInfo GetExtensionMethod(this Type type, Assembly extensionsAssembly, string name, Type[] types) {
             var methods = (from m in type.GetExtensionMethods(extensionsAssembly)
                            where m.Name == name
                            && m.GetParameters().Count() == types.Length + 1 // + 1 because extension method parameter (this)
@@ -130,14 +204,16 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// XML ドキュメントを用いて、uGUI オブジェクトを生成する
+        /// ## XMLを解釈して uGUI オブジェクトツリーを生成する
+        /// ## Create uGUI objects tree from XML
         /// </summary>
         /// <param name="gameObject"></param>
         /// <param name="xml"></param>
+        /// <returns></returns>
         public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject gameObject, string xml) {
 
             var canvas = gameObject.MedamaUIGetCanvas();
-            var eventsystem = gameObject.MedamaUIGetEventSystem();
+            gameObject.MedamaUIGetEventSystem();
 
             var doc = XElement.Parse(xml);
             var dcGO = new Dictionary<int, GameObject>();
@@ -176,14 +252,12 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// 拡張メソッドコール用引数情報生成
+        /// ## 拡張メソッド用パラメータを生成する
+        /// ## Create parameters of extension method
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="xElement"></param>
-        /// <returns></returns>
-        public static GameObject MedamaUIInvokeMethod(this GameObject node, XElement xElement, string methodname) {
+        private static GameObject MedamaUIInvokeMethod(this GameObject node, XElement xElement, string methodname) {
 
-            Dictionary<string, object> arguments = new Dictionary<string, object>();
+            // Dictionary<string, object> arguments = new Dictionary<string, object>();
             Type type = node.GetType();
             var methodinfo = type.GetExtensionMethod(methodname);
 
@@ -221,7 +295,7 @@ namespace Medama.EUGML {
                     else if (pi.Value.ParameterType == typeof(Vector3)) { parameters[index] = Vector3.zero; } // Vector3
                     else if (pi.Value.ParameterType == typeof(Texture2D)) { parameters[index] = null; } // Texture2D
                     else if (pi.Value.ParameterType == typeof(Texture3D)) { parameters[index] = null; } // Texture3D
-                    else if (pi.Value.ParameterType == typeof(Sprite)) { parameters[index] = LoadSprite(value); } // Sprite
+                    else if (pi.Value.ParameterType == typeof(Sprite)) { parameters[index] = MedamaUILoadSprite(value); } // Sprite
                     else if (pi.Value.ParameterType == typeof(Image.Type)) { parameters[index] = value.ToImageType(); } // Image.Type
                     else if (pi.Value.ParameterType == typeof(Color)) { parameters[index] = value.ToColor(); } // Color
                     else if (
@@ -247,12 +321,9 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// プロパティ設定
+        /// Set property
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="component"></param>
-        /// <param name="xElement"></param>
-        public static GameObject MedamaUISetPropertyFromXml<T>(this GameObject node, T component, XElement xElement) {
+        private static GameObject MedamaUISetPropertyFromXml<T>(this GameObject node, T component, XElement xElement) {
             foreach (var attribute in xElement.Attributes()) {
                 var key = attribute.Name.ToString();
                 var value = attribute.Value.ToString();
@@ -276,7 +347,7 @@ namespace Medama.EUGML {
                 else if (property.PropertyType == typeof(Vector3)) { property.SetValue(component, Vector3.zero, null); } // Vector3
                 else if (property.PropertyType == typeof(Texture2D)) { property.SetValue(component, null, null); } // Texture2D
                 else if (property.PropertyType == typeof(Texture3D)) { property.SetValue(component, null, null); } // Texture3D
-                else if (property.PropertyType == typeof(Sprite)) { property.SetValue(component, LoadSprite(value), null); } // Sprite
+                else if (property.PropertyType == typeof(Sprite)) { property.SetValue(component, MedamaUILoadSprite(value), null); } // Sprite
                 else if (property.PropertyType == typeof(Image.Type)) { property.SetValue(component, value.ToImageType(), null); } // Image.Type
                 else if (property.PropertyType == typeof(Color)) { property.SetValue(component, value.ToImageType(), null); } // Image.Type
                 else if (property.PropertyType == typeof(GameObject)) { property.SetValue(component, null, null); } // GameObject
@@ -285,17 +356,16 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// リソースから Sprite を読み込み、キャッシュする
+        /// ## リソースからスプライトを読み込み、キャッシュする
+        /// ## Load Sprite and cache from Resources.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static Sprite LoadSprite(string value) {
+        public static Sprite MedamaUILoadSprite(string value) {
 
-            // パスタイプ判定
-            var pathTypelse = (value.IndexOf("://") < 0) ? "" : value.Substring(0, value.IndexOf("://") + 1);
+            // Check path type
+            // var pathTypelse = (value.IndexOf("://") < 0) ? "" : value.Substring(0, value.IndexOf("://") + 1);
             value = (value.IndexOf("://") < 0) ? value : value.Substring(value.IndexOf("://") + 3);
 
-            // マルチスプライト名#スプライト名 の分割
+            // Split multi sprite name # sprite name
             var spriteNamePair = value.Split('#');
             string parent = (spriteNamePair.Length == 2) ? spriteNamePair[0] : "";
             string name = (spriteNamePair.Length == 2) ? spriteNamePair[1] : (spriteNamePair.Length > 0 ? spriteNamePair[0] : "");
@@ -308,120 +378,72 @@ namespace Medama.EUGML {
 
             if (string.IsNullOrEmpty(parent)) {
 
-                // 親無し
+                // No parents
                 if (!UIManager.Instance.sprites.ContainsKey(_toplevel_resource)) {
                     UIManager.Instance.sprites[_toplevel_resource] = new Dictionary<string, Sprite>();
                 }
                 if (!UIManager.Instance.sprites[_toplevel_resource].ContainsKey(name)) {
                     //UIManager.Instance.sprites[_toplevel_resource][name] = Resources.Load<Sprite>(name);
-                    UIManager.Instance.sprites[_toplevel_resource][name] = UnityEngine.Resources.Load<Sprite>(name);
+                    UIManager.Instance.sprites[_toplevel_resource][name] = Resources.Load<Sprite>(name);
                 }
                 returnSprite = UIManager.Instance.sprites[_toplevel_resource][name];
 
             } else {
 
-                // 親有り
+                // Parent
                 if (!UIManager.Instance.sprites.ContainsKey(parent)) {
-                    UIManager.Instance.sprites[parent] = UnityEngine.Resources.LoadAll<Sprite>(parent).ToDictionary<Sprite, string>(sprite => sprite.name);
+                    UIManager.Instance.sprites[parent] = Resources.LoadAll<Sprite>(parent).ToDictionary(sprite => sprite.name);
                 }
                 UIManager.Instance.sprites[parent].TryGetValue(name, out returnSprite);
+
             }
 
             return returnSprite;
         }
 
+        /// <summary>
+        /// ## EventSystemを取得する。それが存在しなければ生成する
+        /// ## If an EventSystem already exists, it returns its gameObject, and if not, it creates it
+        /// </summary>
+        public static GameObject MedamaUIGetEventSystem(this GameObject node) { return MedamaUIGetEventSystem(); }
 
         /// <summary>
-        /// XMLドキュメントを用いて、uGuiオブジェクトを生成する
+        /// ## EventSystemを取得する。それが存在しなければ生成する
+        /// ## If an EventSystem already exists, it returns its gameObject, and if not, it creates it
         /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="xml"></param>
-        public static Dictionary<int, GameObject> MedamaUIAddGuiFromXml(this GameObject gameObject, string xml) {
-
-            var doc = XElement.Parse(xml);
-            var dcGO = new Dictionary<int, GameObject>();
-
-            foreach (var node in doc.Descendants().Where(x => x.Name.ToString().ToLower() == "node")) {
-
-                // Get parent
-                var parent = node.Parent;
-                var parent_instanceid = (parent != null && parent.Attribute("InstanceID") != null) ? parent.Attribute("InstanceID").Value : null;
-                int instance_id = 0;
-                GameObject parent_obj = null;
-                if (parent_instanceid != null) {
-                    parent_obj = (int.TryParse(parent_instanceid, out instance_id) || dcGO.ContainsKey(instance_id)) ? dcGO[instance_id] : null;
-                }
-
-                // Create Node
-                GameObject addnode = new GameObject(node.Name.ToString());
-
-                if (parent_obj != null) {
-                    addnode.transform.SetParent(parent_obj.transform);
-                } else {
-                    addnode.transform.SetParent(gameObject.MedamaUIGetCanvas().transform);
-                }
-
-                // Add RectTransform
-                addnode.AddComponent<RectTransform>();
-                var rect = addnode.GetComponent<RectTransform>();
-                UIUtil.SetProperty(rect, node);
-
-                // Set Dictionary
-                dcGO[addnode.GetInstanceID()] = addnode;
-                node.SetAttributeValue("InstanceID", addnode.GetInstanceID());
-
-                // Components
-                foreach (var component in node.Elements().Where(x => x.Name.ToString().ToLower() == "component")) {
-                    try {
-                        System.Type oComponentType = null;
-                        switch (component.Attribute("name").Value.ToLower()) {
-                            case "canvasrenderer": oComponentType = typeof(CanvasRenderer); break;
-                            case "image": oComponentType = typeof(Image); break;
-                            case "layoutelement": oComponentType = typeof(LayoutElement); break;
-                            case "text": oComponentType = typeof(Text); break;
-                            case "button": oComponentType = typeof(Button); break;
-                            default: throw new System.Exception("Attribute name is invalid.");
-                        }
-                        addnode.AddComponent(oComponentType);
-                        var component_obj = addnode.GetComponent(oComponentType);
-                        UIUtil.SetProperty(component_obj, component);
-                    } catch (System.Exception ex) {
-                        Debug.Log(ex.Message + "\n" + ex.StackTrace);
-                    }
-                }
-
-
+        public static GameObject MedamaUIGetEventSystem() {
+            GameObject event_object;
+            var ev = UnityEngine.Object.FindObjectOfType<EventSystem>();
+            if (ev == null) {
+                event_object = new GameObject("EventSystem");
+                event_object.AddComponent<EventSystem>();
+                event_object.AddComponent<StandaloneInputModule>();
+            } else {
+                event_object = ev.gameObject;
             }
-            Debug.Log(doc.ToString());
-
-            return dcGO;
+            return event_object;
         }
 
         /// <summary>
-        /// イベントシステム取得<br />
-        /// すでにイベントシステムが存在する場合はそれの gameObject を返し、存在しない場合は生成する
+        /// ## Canvasを取得する。それが存在しなければ生成する
+        /// ## If the Canvas already exists, it returns its gameObject, and if it does not exist, it creates it
         /// </summary>
-        /// <returns>イベントシステム gameObject</returns>
-        public static GameObject MedamaUIGetEventSystem(this GameObject node) {
-            return UIUtil.GetEventSystem();
-        }
+        public static GameObject MedamaUIGetCanvas(this GameObject node) { return MedamaUIGetCanvas(); }
 
         /// <summary>
-        /// キャンバス取得<br />
-        /// すでにキャンバスが存在する場合はそれの gameObject を返し、存在しない場合は生成する
+        /// ## Canvasを取得する。それが存在しなければ生成する
+        /// ## If the Canvas already exists, it returns its gameObject, and if it does not exist, it creates it
         /// </summary>
-        /// <returns>キャンバス gameObject</returns>
-        public static GameObject MedamaUIGetCanvas(this GameObject node) {
+        public static GameObject MedamaUIGetCanvas() {
             GameObject canvas_object;
             var canvas = UnityEngine.Object.FindObjectOfType<Canvas>();
             if (canvas == null) {
                 canvas_object = new GameObject("Canvas");
 
-                canvas_object.AddComponent<Canvas>();
+                canvas = canvas_object.AddComponent<Canvas>();
                 canvas_object.AddComponent<CanvasScaler>();
                 canvas_object.AddComponent<GraphicRaycaster>();
 
-                canvas = canvas_object.GetComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             } else {
                 canvas_object = canvas.gameObject;
@@ -430,16 +452,9 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// UIノード追加
+        /// ## uGUIオブジェクトを作成して指定された親オブジェクトにアタッチする。親オブジェクトが省略されている場合は、Canvasにアタッチする
+        /// ## Create and attach uGUI object to the specified parent object. If parent is omitted, attach to Canvas.
         /// </summary>
-        /// <param name="parent">UI親ノード（省略でCanvas）</param>
-        /// <param name="name">ノード名（省略でGUID）</param>
-        /// <param name="anchorMin">anchorMin（省略で 0, 0）</param>
-        /// <param name="anchorMax">anchorMax（省略で 0, 0）</param>
-        /// <param name="anchoredPosition">anchoredPosition（省略で 0, 0）</param>
-        /// <param name="sizeDelta">sizeDelta（省略で 100, 100）</param>
-        /// <param name="pivot">pivot（省略で 0, 0）</param>
-        /// <returns>追加されたノード gameObject</returns>
         public static GameObject MedamaUIAddNode(
             this GameObject parent,
             string name = "",
@@ -491,26 +506,18 @@ namespace Medama.EUGML {
 
             return string.IsNullOrEmpty(sprite)
                 ? parent.MedamaUIAddNode(name, anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot_set)
-                : parent.MedamaUIAddNode(name, anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot_set).MedamaUISetCanvasRender().MedamaUISetImage(UIUtil.LoadSprite(sprite), spritetype);
+                : parent.MedamaUIAddNode(name, anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot_set).MedamaUISetCanvasRender().MedamaUISetImage(MedamaUILoadSprite(sprite), spritetype);
         }
 
         /// <summary>
-        /// UIノード追加
+        /// ## uGUIオブジェクトを作成して指定された親オブジェクトにアタッチする。親オブジェクトが省略されている場合は、Canvasにアタッチする
+        /// ## Create and attach uGUI object to the specified parent object. If parent is omitted, attach to Canvas.
         /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="name"></param>
-        /// <param name="anchorMin"></param>
-        /// <param name="anchorMax"></param>
-        /// <param name="anchoredPosition"></param>
-        /// <param name="sizeDelta"></param>
-        /// <param name="pivot"></param>
-        /// <returns></returns>
         public static GameObject MedamaUIAddNode(this GameObject parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPosition, Vector2 sizeDelta, Vector2 pivot) {
             name = string.IsNullOrEmpty(name) ? Guid.NewGuid().ToString() : name;
             GameObject node = new GameObject(name);
-            node.AddComponent<RectTransform>();
+            var rect = node.AddComponent<RectTransform>();
             node.transform.SetParent(parent.transform);
-            var rect = node.GetComponent<RectTransform>();
             rect.anchoredPosition = anchoredPosition;
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
@@ -519,178 +526,97 @@ namespace Medama.EUGML {
             return node;
         }
 
-
         /// <summary>
-        /// UIノード追加
+        /// ## Regist Image component
         /// </summary>
-        /// <param name="parent">UI親ノード</param>
-        /// <param name="name">ノード名（省略でGUID）</param>
-        /// <param name="anchorMin">anchorMin（省略で 0, 0）</param>
-        /// <param name="anchorMax">anchorMax（省略で 0, 0）</param>
-        /// <param name="anchoredPosition">anchoredPosition（省略で 0, 0）</param>
-        /// <param name="sizeDelta">sizeDelta（省略で 100, 100）</param>
-        /// <param name="pivot">pivot（省略で 0, 0）</param>
-        /// <returns>追加されたノード gameObject</returns>
-        public static GameObject UIAddNode(
-            this GameObject parent,
-            string name = "",
-            Nullable<Vector2> anchorMin = null,
-            Nullable<Vector2> anchorMax = null,
-            Nullable<Vector2> anchoredPosition = null,
-            Nullable<Vector2> sizeDelta = null,
-            Nullable<Vector2> pivot = null,
-            LayoutType layoutType = LayoutType.NoUse,
-            float up = 0,
-            float down = 0,
-            float left = 0,
-            float right = 0,
-            float scrollBarWidwh = 20,
-            float scrollBarHeight = 20
-        ) {
-            switch (layoutType) {
-                case LayoutType.NoUse:
-                    break;
-                case LayoutType.ScreenFit:
-                    sizeDelta = new Vector2(Screen.width - (left + right), Screen.height - (up + down));
-                    break;
-                case LayoutType.ScreenFitWithScrollBarBoth:
-                    sizeDelta = new Vector2(Screen.width - (left + right + scrollBarWidwh), Screen.height - (up + down + scrollBarHeight));
-                    break;
-                case LayoutType.ParentFit:
-                    anchorMin = Vector2.zero;
-                    anchorMax = Vector2.one;
-                    break;
-                case LayoutType.ParentFitWithScrollBarBoth:
-                    anchorMin = Vector2.zero;
-                    anchorMax = Vector2.one;
-                    sizeDelta = new Vector2(-scrollBarWidwh * 2, -scrollBarHeight * 2);
-                    break;
-            }
-            return UIUtil.AddNode(parent, name, anchorMin, anchorMax, anchoredPosition, sizeDelta, pivot);
-        }
-
-        /// <summary>
-        /// Imageコンポーネント登録
-        /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <param name="sprite">スプライトオブジェクト</param>
-        /// <param name="type">イメージ表示タイプ</param>
         public static GameObject MedamaUISetImage(
             this GameObject node,
             Sprite sprite = null,
             Image.Type type = Image.Type.Simple
         ) {
-            return UIUtil.SetImage(node, sprite, type);
-        }
-
-        /// <summary>
-        /// CanvasRenderコンポーネント登録
-        /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        public static GameObject MedamaUISetCanvasRender(
-            this GameObject node
-        ) {
-            return UIUtil.SetCanvasRender(node);
-        }
-
-        /// <summary>
-        /// Maskコンポーネント登録
-        /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <param name="showMaskGraphic">マスク画像表示</param>
-        public static GameObject MedamaUISetMask(
-            this GameObject node,
-            bool showMaskGraphic = true
-        ) {
-            var mask = node.GetComponent<Mask>();
-            if (mask == null) {
-                node.AddComponent<Mask>();
-                mask = node.GetComponent<Mask>();
-            }
-            mask.showMaskGraphic = showMaskGraphic;
-
+            var image = node.GetComponent<Image>() ?? node.AddComponent<Image>();
+            image.sprite = sprite;
+            image.type = type;
             return node;
         }
 
         /// <summary>
-        /// ScrollRectコンポーネント登録
+        /// ## Regist CanvasRender component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <param name="horizontal">横スクロール</param>
-        /// <param name="vertical">縦スクロール</param>
-        /// <param name="movementType">スクロールタイプ</param>
-        /// <returns>適用後 gameObject</returns>
+        public static GameObject MedamaUISetCanvasRender(
+            this GameObject node
+        ) {
+            if (node.GetComponent<CanvasRenderer>() == null) node.AddComponent<CanvasRenderer>();
+            return node;
+        }
+
+        /// <summary>
+        /// ## Regist Mask component
+        /// </summary>
+        public static GameObject MedamaUISetMask(
+            this GameObject node,
+            bool showMaskGraphic = true
+        ) {
+            var mask = node.GetComponent<Mask>() ?? node.AddComponent<Mask>();
+            mask.showMaskGraphic = showMaskGraphic;
+            return node;
+        }
+
+        /// <summary>
+        /// ## Regist ScrollRect component
+        /// </summary>
         public static GameObject MedamaUISetScrollRect(
             this GameObject node,
             bool horizontal = true,
             bool vertical = true,
             ScrollRect.MovementType movementType = ScrollRect.MovementType.Elastic
         ) {
-            var scroll_rect = node.GetComponent<ScrollRect>();
-            if (scroll_rect == null) {
-                node.AddComponent<ScrollRect>();
-                scroll_rect = node.GetComponent<ScrollRect>();
-            }
+            var scroll_rect = node.GetComponent<ScrollRect>() ?? node.AddComponent<ScrollRect>();
             scroll_rect.horizontal = horizontal;
             scroll_rect.vertical = vertical;
             scroll_rect.movementType = movementType;
-
             return node;
         }
 
         /// <summary>
-        /// HorizontalLayoutGroupコンポーネント登録
+        /// ## Regist HorizontalLayoutGroup component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <param name="childAlignment"></param>
-        /// <param name="childForceExpandWidth"></param>
-        /// <param name="childForceExpandHeight"></param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject UISetHorizontalLayoutGroup(
             this GameObject node,
-            UnityEngine.TextAnchor childAlignment = UnityEngine.TextAnchor.MiddleCenter,
+            TextAnchor childAlignment = TextAnchor.MiddleCenter,
             float spacing = 0,
             bool childForceExpandWidth = false,
             bool childForceExpandHeight = false
         ) {
-            return UIUtil.SetHorizontalLayoutGroup(node, childAlignment, spacing, childForceExpandWidth, childForceExpandHeight);
-        }
-
-        /// <summary>
-        /// VerticalLayoutGroupコンポーネント登録
-        /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <param name="childAlignment"></param>
-        /// <param name="childForceExpandWidth"></param>
-        /// <param name="childForceExpandHeight"></param>
-        /// <returns>適用後 gameObject</returns>
-        public static GameObject MedamaUISetVerticalLayoutGroup(
-            this GameObject node,
-            UnityEngine.TextAnchor childAlignment = UnityEngine.TextAnchor.MiddleCenter,
-            float spacing = 0,
-            bool childForceExpandWidth = false,
-            bool childForceExpandHeight = false
-        ) {
-            var layout = node.GetComponent<VerticalLayoutGroup>();
-            if (layout == null) {
-                node.AddComponent<VerticalLayoutGroup>();
-                layout = node.GetComponent<VerticalLayoutGroup>();
-            }
+            var layout = node.GetComponent<HorizontalLayoutGroup>() ?? node.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = childAlignment;
             layout.spacing = spacing;
             layout.childForceExpandWidth = childForceExpandWidth;
             layout.childForceExpandHeight = childForceExpandHeight;
-
             return node;
         }
 
         /// <summary>
-        /// ContentSizeFitterコンポーネント登録
+        /// ## Regist VerticalLayoutGroup component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <param name="horizontalFit"></param>
-        /// <param name="verticalFit"></param>
-        /// <returns>適用後 gameObject</returns>
+        public static GameObject MedamaUISetVerticalLayoutGroup(
+            this GameObject node,
+            TextAnchor childAlignment = TextAnchor.MiddleCenter,
+            float spacing = 0,
+            bool childForceExpandWidth = false,
+            bool childForceExpandHeight = false
+        ) {
+            var layout = node.GetComponent<VerticalLayoutGroup>() ?? node.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = childAlignment;
+            layout.spacing = spacing;
+            layout.childForceExpandWidth = childForceExpandWidth;
+            layout.childForceExpandHeight = childForceExpandHeight;
+            return node;
+        }
+
+        /// <summary>
+        /// ## Regist ContentSizeFitter component
+        /// </summary>
         public static GameObject MedamaUISetContentSizeFitter(
             this GameObject node,
             ContentSizeFitter.FitMode horizontalFit = ContentSizeFitter.FitMode.Unconstrained,
@@ -716,23 +642,15 @@ namespace Medama.EUGML {
                     verticalFit = ContentSizeFitter.FitMode.PreferredSize;
                     break;
             }
-            var filter = node.GetComponent<ContentSizeFitter>();
-            if (filter == null) {
-                node.AddComponent<ContentSizeFitter>();
-                filter = node.GetComponent<ContentSizeFitter>();
-            }
-
+            var filter = node.GetComponent<ContentSizeFitter>() ?? node.AddComponent<ContentSizeFitter>();
             filter.horizontalFit = horizontalFit;
             filter.verticalFit = verticalFit;
-
             return node;
         }
 
         /// <summary>
-        /// 親ScrollRectにContentノード設定
+        /// ## Attach content node to parent ScrollRect node
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="parent"></param>
         /// <returns></returns>
         public static GameObject MedamaUIAttachContentToScrollRect(
             this GameObject node,
@@ -751,32 +669,22 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// LayoutElementコンポーネント登録
+        /// ## Regist LayoutElement component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject MedamaUISetLayoutElement(
             this GameObject node,
             float minWidth = 16,
             float minHeight = 16
         ) {
-            var element = node.GetComponent<LayoutElement>();
-            if (element == null) {
-                node.AddComponent<LayoutElement>();
-                element = node.GetComponent<LayoutElement>();
-            }
-
+            var element = node.GetComponent<LayoutElement>() ?? node.AddComponent<LayoutElement>();
             element.minWidth = minWidth;
             element.minHeight = minHeight;
-
             return node;
         }
 
         /// <summary>
-        /// Textコンポーネント登録
+        /// ## Regist Text component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject MedamaUISetText(
             this GameObject node,
             string textstring = "",
@@ -796,13 +704,10 @@ namespace Medama.EUGML {
             var setColor = color ?? Color.black;
 
             if (font == null) {
-                font = UnityEngine.Resources.GetBuiltinResource<Font>("Arial.ttf");
+                font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             }
 
-            var text = node.GetComponent<Text>();
-            if (text == null) {
-                text = node.AddComponent<Text>();
-            }
+            var text = node.GetComponent<Text>() ?? node.AddComponent<Text>();
 
             text.text = textstring ?? "";
             text.color = setColor;
@@ -822,18 +727,8 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// InputField コンポーネント登録
+        /// ## Regist InputField component
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="textPlaceholder"></param>
-        /// <param name="fontSize"></param>
-        /// <param name="textColor"></param>
-        /// <param name="placeHolderColor"></param>
-        /// <param name="top"></param>
-        /// <param name="bottom"></param>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
         public static GameObject MedamaUISetInputField(
             this GameObject node,
             string textPlaceholder = "",
@@ -846,10 +741,7 @@ namespace Medama.EUGML {
             float right = 10,
             InputField.ContentType contentType = InputField.ContentType.Standard
         ) {
-            var inputField = node.GetComponent<InputField>();
-            if (inputField == null) {
-                inputField = node.AddComponent<InputField>();
-            }
+            var inputField = node.GetComponent<InputField>() ?? node.AddComponent<InputField>();
 
             var text = node.MedamaUIAddNode("Text", LayoutType.StretchStretch, 0, 0, top, bottom, left, right, "", Image.Type.Simple)
                 .MedamaUISetText("", textColor, fontSize, TextAnchor.MiddleLeft)
@@ -867,35 +759,24 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// Buttonコンポーネント登録
+        /// ## Regist Button component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject MedamaUISetButton(
             this GameObject node,
             string textButton = "",
             Color? colorButton = null
         ) {
-            var button = node.GetComponent<Button>();
-            if (button == null) {
-                button = node.AddComponent<Button>();
-            }
-            var image = node.GetComponent<Image>();
-            if (image != null) {
-                button.targetGraphic = image;
-            }
-
-            var text = node.MedamaUIAddNode("Text", LayoutType.StretchStretch, 0, 0, 0, 0, 0, 0, "", Image.Type.Simple)
+            if (node.GetComponent<Button>() == null) node.AddComponent<Button>();
+            if (node.GetComponent<Image>() == null) node.AddComponent<Image>();
+            node.MedamaUIAddNode("Text", LayoutType.StretchStretch, 0, 0, 0, 0, 0, 0, "", Image.Type.Simple)
                 .MedamaUISetText(textButton, colorButton);
 
             return node;
         }
 
         /// <summary>
-        /// Scrollbarコンポーネント登録
+        /// ## Regist Scrollbar component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject MedamaUISetScrollbar(
             this GameObject node,
             GameObject scrollview = null,
@@ -903,10 +784,7 @@ namespace Medama.EUGML {
             bool Vertical = false
         ) {
 
-            var scrollbar = node.GetComponent<Scrollbar>();
-            if (scrollbar == null) {
-                scrollbar = node.AddComponent<Scrollbar>();
-            }
+            var scrollbar = node.GetComponent<Scrollbar>() ?? node.AddComponent<Scrollbar>();
 
             if (scrollview != null) {
                 var scroll_rect = scrollview.GetComponent<ScrollRect>();
@@ -928,10 +806,8 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// ScrollbarコンポーネントにHandleのRectTransformを登録
+        /// ## Regist Handle's RectTransform to Scrollbar component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject MedamaUISetHandleToScrollBar(
             this GameObject node,
             GameObject handle
@@ -945,10 +821,8 @@ namespace Medama.EUGML {
         }
 
         /// <summary>
-        /// ScrollbarコンポーネントにHandleのRectTransformを登録
+        /// ## Regist Handle's RectTransform to Scrollbar component
         /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
         public static GameObject MedamaUISetScrollBarValue(
             this GameObject node,
             float value
@@ -959,18 +833,5 @@ namespace Medama.EUGML {
             }
             return node;
         }
-
-        /// <summary>
-        /// EventTriggerコンポーネント登録
-        /// </summary>
-        /// <param name="node">登録先 gameObject</param>
-        /// <returns>適用後 gameObject</returns>
-        public static GameObject UISetEventTrigger(
-            this GameObject node,
-            List<EventSet> lsEventSet = null
-        ) {
-            return UIUtil.SetEventTrigger(node, lsEventSet);
-        }
-
     }
 }
