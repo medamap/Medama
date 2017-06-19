@@ -11,7 +11,7 @@ public class rpmqa_thread : MonoBehaviour
 
     void Start() {
         var loginxml = Resources.Load<TextAsset>("Medama/EUGML/login");
-        var dc = gameObject.MedamaUIParseXml(loginxml.text);
+        var dc = EUGML.MedamaUIParseXml(loginxml.text);
 
         var host = dc.Where(gopair => gopair.Value.name == "InputHost").FirstOrDefault().Value.GetComponent<InputField>();
         var user = dc.Where(gopair => gopair.Value.name == "InputUser").FirstOrDefault().Value.GetComponent<InputField>();

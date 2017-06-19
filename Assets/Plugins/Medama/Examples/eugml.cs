@@ -6,7 +6,7 @@ using Medama.EUGML;
 public class eugml : MonoBehaviour {
     void Start () {
         // Create UI from XML.
-        var dc = gameObject.MedamaUIParseXml(@"<?xml version='1.0'?>
+        var dc = EUGML.MedamaUIParseXml(@"<?xml version='1.0'?>
 <uGUI xmlins='http://megamin.jp/ns/unity3d/ugui/eugml'>
   
   <!-- Window form -->

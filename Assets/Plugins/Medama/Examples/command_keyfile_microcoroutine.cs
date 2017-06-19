@@ -14,7 +14,7 @@ public class command_keyfile_microcoroutine : MonoBehaviour
     void Start() {
         // Create UI.
         var loginxml = Resources.Load<TextAsset>("Medama/EUGML/login_with_keyfile");
-        var dc = gameObject.MedamaUIParseXml(loginxml.text);
+        var dc = EUGML.MedamaUIParseXml(loginxml.text);
 
         // Get UI components.
         // * Caution: Null not checking *

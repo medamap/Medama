@@ -8,7 +8,7 @@ public class samplescene : MonoBehaviour {
 
 	void Start () {
 
-        var dc = gameObject.MedamaUIParseXml(
+        var dc = EUGML.MedamaUIParseXml(
 @"<?xml version='1.0'?>
 <uGUI xmlins='http://megamin.jp/ns/unity3d/ugui/eugml'>
 

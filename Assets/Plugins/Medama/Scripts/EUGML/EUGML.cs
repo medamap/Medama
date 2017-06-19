@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System;
@@ -127,7 +126,7 @@ namespace Medama.EUGML {
     /// # GameObjectの拡張メソッドを定義する
     /// # Define extension method of GameObject.
     /// </summary>
-    public static partial class GameObjectExtensions {
+    public static partial class EUGML {
 
         private static readonly Vector2 top_left = new Vector2(0f, 1f);
         private static readonly Vector2 center_left = new Vector2(0f, 0.5f);
@@ -210,44 +209,50 @@ namespace Medama.EUGML {
         /// <param name="gameObject"></param>
         /// <param name="xml"></param>
         /// <returns></returns>
-        public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject gameObject, string xml) {
+        public static Dictionary<int, GameObject> MedamaUIParseXml(string xml) {
+            var canvas = MedamaUIGetCanvas();
+            MedamaUIGetEventSystem();
 
+            return canvas.MedamaUIParseXml(xml);
+        }
+
+        /// <summary>
+        /// ## XMLを解釈して uGUI オブジェクトツリーを生成する
+        /// ## Create uGUI objects tree from XML
+        /// </summary>
+        /// <param name="gameObject"></param>
+        /// <param name="xml"></param>
+        /// <returns></returns>
+        public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject gameObject, string xml)
+        {
             var canvas = gameObject.MedamaUIGetCanvas();
             gameObject.MedamaUIGetEventSystem();
 
             var doc = XElement.Parse(xml);
             var dcGO = new Dictionary<int, GameObject>();
 
-            foreach (var xml_node in doc.Descendants().Where(x => x.Name.ToString().ToLower() == "addnode")) {
+            return gameObject.MedamaUIParseXml(doc, dcGO);
+        }
 
-                // Get parent
-                var parent = xml_node.Parent;
-                var parent_instanceid = (parent != null && parent.Attribute("InstanceID") != null) ? parent.Attribute("InstanceID").Value : null;
-                int instance_id = 0;
-                GameObject parent_obj = null;
-                if (parent_instanceid != null) {
-                    parent_obj = (int.TryParse(parent_instanceid, out instance_id) || dcGO.ContainsKey(instance_id)) ? dcGO[instance_id] : null;
-                }
-
-                // Create Node
-                var node = (parent_obj != null)
-                    ? parent_obj.MedamaUIInvokeMethod(xml_node, "MedamaUIAddNode")
-                    : canvas.MedamaUIInvokeMethod(xml_node, "MedamaUIAddNode");
-
-                // Set Dictionary
-                dcGO[node.GetInstanceID()] = node;
-                xml_node.SetAttributeValue("InstanceID", node.GetInstanceID());
-
-                // Components
-                foreach (var xml_component in xml_node.Elements().Where(x => x.Name.ToString().ToLower() != "addnode")) {
-                    try {
-                        node.MedamaUIInvokeMethod(xml_component, "MedamaUI" + xml_component.Name.ToString());
-                    } catch (Exception ex) {
-                        Debug.Log(ex.Message + "\n" + ex.StackTrace);
+        /// <summary>
+        /// ## XMLを解釈して uGUI オブジェクトツリーを生成する
+        /// ## Create uGUI objects tree from XML
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="xml"></param>
+        /// <returns></returns>
+        public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject parent, XElement doc, Dictionary<int, GameObject> dcGO) {
+            foreach (var xml_node in doc.Elements()) {
+                try {
+                    var node = parent.MedamaUIInvokeMethod(xml_node, dcGO);
+                    dcGO[node.GetInstanceID()] = node;
+                    if (doc.HasElements) {
+                        node.MedamaUIParseXml(xml_node, dcGO);
                     }
+                } catch (Exception ex) {
+                    Debug.Log(ex.Message + "\n" + ex.StackTrace + "\nDetail : " + xml_node.Name.ToString());
                 }
             }
-
             return dcGO;
         }
 
@@ -255,14 +260,16 @@ namespace Medama.EUGML {
         /// ## XMLノード内の属性をパラメータに変換し、拡張メソッドをコールする
         /// ## Convert attributes in the XML node to parameters and call extension methods.
         /// </summary>
-        private static GameObject MedamaUIInvokeMethod(this GameObject node, XElement xElement, string methodname) {
+        private static GameObject MedamaUIInvokeMethod(this GameObject node, XElement xElement, Dictionary<int, GameObject> dcGO) {
+
+            var method = "MedamaUI" + xElement.Name.ToString();
 
             // Dictionary<string, object> arguments = new Dictionary<string, object>();
             Type type = node.GetType();
-            var methodinfo = type.GetExtensionMethod(methodname);
+            var methodinfo = type.GetExtensionMethod(method);
 
             if (methodinfo == null) {
-                Debug.LogWarningFormat("method name {0} is not found in {1}", methodname, type.ToString());
+                Debug.LogWarningFormat("method name {0} is not found in {1}", method, type.ToString());
                 return node;
             }
 
@@ -304,12 +311,12 @@ namespace Medama.EUGML {
                         Nullable.GetUnderlyingType(pi.Value.ParameterType) == typeof(Color)) {
                         parameters[index] = value.ToColor();
                     } // Nullable<Color>
-                    else if (pi.Value.ParameterType == typeof(GameObject)) { parameters[index] = null; } // GameObject
+                    else if (pi.Value.ParameterType == typeof(GameObject)) { parameters[index] = dcGO.Where(x => x.Value.name == value).Select(x => x.Value).FirstOrDefault(); } // GameObject
                     else if (pi.Value.ParameterType == typeof(LayoutType)) { parameters[index] = value.ToLayoutType(); } // Mera.UI.LayoutType
                     else if (pi.Value.ParameterType == typeof(TextAnchor)) { parameters[index] = value.ToTextAnchor(); } // TextAnchor
                     else if (pi.Value.ParameterType == typeof(ScrollRect.MovementType)) { parameters[index] = value.ToMovementType(); } // MovementType
                     else if (pi.Value.ParameterType == typeof(bool) && bool.TryParse(value, out boolValue)) { parameters[index] = boolValue; } // bool
-                    else if (pi.Value.ParameterType == typeof(ContentSizeFitter.FitMode)) { parameters[index] = value; } // ContentSizeFitter.FitMode
+                    else if (pi.Value.ParameterType == typeof(ContentSizeFitter.FitMode)) { parameters[index] = value.ToFitMode(); } // ContentSizeFitter.FitMode
                     else if (pi.Value.ParameterType == typeof(InputField.ContentType)) { parameters[index] = value.ToContentType(); } // InputField.ContentType
                     else { Debug.LogWarningFormat("Parameter type {0} is not implements in {1}", pi.Value.ParameterType.FullName, xElement.ToString()); }
                 }
@@ -551,7 +558,7 @@ namespace Medama.EUGML {
         /// <summary>
         /// ## Regist HorizontalLayoutGroup component
         /// </summary>
-        public static GameObject UISetHorizontalLayoutGroup(
+        public static GameObject MedamaUISetHorizontalLayoutGroup(
             this GameObject node,
             TextAnchor childAlignment = TextAnchor.MiddleCenter,
             float spacing = 0,
@@ -802,6 +809,84 @@ namespace Medama.EUGML {
                 scrollbar.value = value;
             }
             return node;
+        }
+
+        /// <summary>
+        /// ## データグリッドを設定する
+        /// ## Regist DataGrid component
+        /// </summary>
+        public static void MedamaUISetDataGrid<T>(
+            this GameObject node,
+            string name = "DataGrid",
+            List<T> list = null,
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance,
+            LayoutType rowLayout = LayoutType.TopStretch,
+            TextAnchor rowChildAlignment = TextAnchor.UpperLeft,
+            LayoutType cellLayout = LayoutType.TopLeft,
+            int minWidth = 120,
+            int minHeight = 24,
+            string datagridSprite = "resources://Medama/EUGML/UI001#Group001",
+            string scrollviewSprite = "resources://Medama/EUGML/UI001#Group001",
+            string headerSprite = "resources://Medama/EUGML/UI001#GridHead001",
+            string cellSprite = "resources://Medama/EUGML/UI001#GridCell001",
+            string vscrollbarSprite = "resources://Medama/EUGML/UI001#GridCell001",
+            string vslideareaSprite = "resources://Medama/EUGML/UI001#GridHead001",
+            string hscrollbarSprite = "resources://Medama/EUGML/UI001#GridCell001",
+            string hslideareaSprite = "resources://Medama/EUGML/UI001#GridHead001"
+        ) {
+            var type = typeof(T);
+            var members = type.GetFields(flags);
+
+            var datagrid = node.MedamaUIAddNode(name: name, top: 8, bottom: 8, left: 8, right: 8, sprite: datagridSprite);
+
+            var scrollview = datagrid.MedamaUIAddNode(name: "ScrollView", right: 20, bottom: 20, sprite: scrollviewSprite)
+                .MedamaUISetScrollRect(movementType: ScrollRect.MovementType.Clamped)
+                .MedamaUISetMask(showMaskGraphic: true);
+
+            var content = scrollview.MedamaUIAddNode(name: "Content", bottom: 8, right: 8)
+                .MedamaUISetVerticalLayoutGroup()
+                .MedamaUISetContentSizeFitter(horizontalFit: ContentSizeFitter.FitMode.PreferredSize, verticalFit: ContentSizeFitter.FitMode.PreferredSize)
+                .MedamaUIAttachContentToScrollRect();
+
+            var index = 1;
+            foreach (var data in list) {
+                // Header
+                if (index == 1) {
+                    var headerrow = content.MedamaUIAddNode(name: "HeaderRow", layout: rowLayout)
+                        .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
+                    foreach (var member in members) {
+                        headerrow.MedamaUIAddNode(name: member.Name, layout: cellLayout, sprite: headerSprite)
+                            .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
+                            .MedamaUIAddNode(name: "Text")
+                            .MedamaUISetText(textstring: member.Name);
+                    }
+                }
+                // Data
+                var datarow = content.MedamaUIAddNode(name: "DataCell" + index.ToString(), layout: cellLayout)
+                    .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
+                foreach (var member in members) {
+                    datarow.MedamaUIAddNode(name: member.Name + index.ToString(), layout: cellLayout, sprite: cellSprite)
+                        .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
+                        .MedamaUIAddNode(name: "Text")
+                        .MedamaUISetText(textstring: member.GetValue(data).ToString());
+                }
+                index++;
+            }
+
+            var vscroll_bar = datagrid.MedamaUIAddNode(name: "VScrollBar", layout: LayoutType.StretchRight, pivot: LayoutType.BottomRight, width: 20, bottom: 20, sprite: vscrollbarSprite)
+                .MedamaUISetScrollbar(Vertical: true, scrollview: scrollview);
+            var vsliding_area = vscroll_bar.MedamaUIAddNode(name: "Sliding Area", layout: LayoutType.StretchStretch, left: 10, top: 10, bottom: 10, right: 10);
+            var vhandle = vsliding_area.MedamaUIAddNode(name: "VHandle", layout: LayoutType.StretchStretch, left: -10, top: -10, bottom: -10, right: -10, sprite: vslideareaSprite);
+
+            vscroll_bar.MedamaUISetHandleToScrollBar(vhandle);
+
+            var hscroll_bar = datagrid.MedamaUIAddNode(name: "HScrollBar", layout: LayoutType.BottomStretch, pivot: LayoutType.BottomLeft, height: 20, right: 20, sprite: hscrollbarSprite)
+                .MedamaUISetScrollbar(Horizontal: true, scrollview: scrollview);
+            var hsliding_area = hscroll_bar.MedamaUIAddNode(name: "Sliding Area", layout: LayoutType.StretchStretch, left: 10, top: 10, bottom: 10, right: 10);
+            var hhandle = hsliding_area.MedamaUIAddNode(name: "HHandle", layout: LayoutType.StretchStretch, left: -10, top: -10, bottom: -10, right: -10, sprite: hslideareaSprite);
+
+            hscroll_bar.MedamaUISetHandleToScrollBar(hhandle);
+
         }
     }
 }
