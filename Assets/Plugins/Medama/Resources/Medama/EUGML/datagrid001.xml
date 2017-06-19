@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<uGUI xmlins='http://megamin.jp/ns/unity3d/ugui/eugml'>
+  
+  <!-- Window form -->
+  <AddNode
+    name='FormMain'
+    sprite='resources://Medama/EUGML/UI001#Window001'
+    layout='StretchStretch' top='8' bottom='8' left='8' right='8'>
+
+    <!-- Title bar -->
+    <AddNode
+      name='TitleMain' sprite='resources://Medama/EUGML/UI001#Header001'
+      layout='TopStretch' height='24' top='8' left='8' right='8' spritetype='Simple'>
+      <AddNode name='Text' layout='StretchStretch'>
+        <SetText textstring=' [__] TEST SSH LOGIN' color='white' alignment='MiddleLeft' />
+      </AddNode>
+    </AddNode>
+    
+    <!-- Contents -->
+    <AddNode
+      name='GroupMain' sprite='resources://Medama/EUGML/UI001#Group001'
+      top='40' bottom='8' left='8' right='8'>
+
+    </AddNode>
+  </AddNode>
+</uGUI>
