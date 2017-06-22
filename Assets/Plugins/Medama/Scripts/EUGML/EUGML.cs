@@ -3,7 +3,9 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System;
+#if MEDAMA_USE_MYSQL
 using System.Data;
+#endif
 using System.Linq;
 using System.Xml.Linq;
 using System.Reflection;
@@ -225,7 +227,9 @@ namespace Medama.EUGML {
         /// <returns></returns>
         public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject gameObject, string xml)
         {
+#pragma warning disable 219, 168
             var canvas = gameObject.MedamaUIGetCanvas();
+#pragma warning restore 219, 168
             gameObject.MedamaUIGetEventSystem();
 
             var doc = XElement.Parse(xml);
@@ -269,7 +273,7 @@ namespace Medama.EUGML {
             var methodinfo = type.GetExtensionMethod(method);
 
             if (methodinfo == null) {
-                Debug.LogWarningFormat("method name {0} is not found in {1}", method, type.ToString());
+                Debug.LogWarning(string.Format("method name {0} is not found in {1}", method, type.ToString()));
                 return node;
             }
 
@@ -318,7 +322,7 @@ namespace Medama.EUGML {
                     else if (pi.Value.ParameterType == typeof(bool) && bool.TryParse(value, out boolValue)) { parameters[index] = boolValue; } // bool
                     else if (pi.Value.ParameterType == typeof(ContentSizeFitter.FitMode)) { parameters[index] = value.ToFitMode(); } // ContentSizeFitter.FitMode
                     else if (pi.Value.ParameterType == typeof(InputField.ContentType)) { parameters[index] = value.ToContentType(); } // InputField.ContentType
-                    else { Debug.LogWarningFormat("Parameter type {0} is not implements in {1}", pi.Value.ParameterType.FullName, xElement.ToString()); }
+                    else { Debug.LogWarning(string.Format("Parameter type {0} is not implements in {1}", pi.Value.ParameterType.FullName, xElement.ToString())); }
                 }
                 index++;
             }
@@ -819,7 +823,9 @@ namespace Medama.EUGML {
             this GameObject node,
             string name = "DataGrid",
             List<T> list = null,
+#if MEDAMA_USE_MYSQL
             DataTable datatable = null,
+#endif
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance,
             LayoutType rowLayout = LayoutType.TopStretch,
             TextAnchor rowChildAlignment = TextAnchor.UpperLeft,
@@ -877,7 +883,7 @@ namespace Medama.EUGML {
                 }
 
             }
-
+#if MEDAMA_USE_MYSQL
             if (datatable != null) {
 
                 var index = 1;
@@ -906,9 +912,9 @@ namespace Medama.EUGML {
                 }
 
             }
-
-            var vscroll_bar = datagrid.MedamaUIAddNode(name: "VScrollBar", layout: LayoutType.StretchRight, pivot: LayoutType.BottomRight, width: 20, bottom: 20, sprite: vscrollbarSprite)
-                .MedamaUISetScrollbar(Vertical: true, scrollview: scrollview);
+#endif
+            var vscroll_bar = datagrid.MedamaUIAddNode(name: "VScrollBar", layout: LayoutType.StretchRight, width: 20, bottom: 20, sprite: vscrollbarSprite, pivot: LayoutType.BottomRight)
+                .MedamaUISetScrollbar(scrollview: scrollview, Vertical: true);
             var vsliding_area = vscroll_bar.MedamaUIAddNode(name: "Sliding Area", layout: LayoutType.StretchStretch, left: 10, top: 10, bottom: 10, right: 10);
             var vhandle = vsliding_area.MedamaUIAddNode(name: "VHandle", layout: LayoutType.StretchStretch, left: -10, top: -10, bottom: -10, right: -10, sprite: vslideareaSprite);
 

@@ -215,7 +215,7 @@ namespace Medama.EUGML {
                 case "centercenter": return LayoutType.CenterCenter;
                 case "centerleft": return LayoutType.CenterLeft;
                 case "centerright": return LayoutType.CenterRight;
-                default: Debug.LogWarningFormat("Invalid Layout {0}", value); return LayoutType.NoUse;
+                default: Debug.LogWarning(string.Format("Invalid Layout {0}", value)); return LayoutType.NoUse;
             }
         }
 
@@ -247,7 +247,7 @@ namespace Medama.EUGML {
                 case "lowerleft": return TextAnchor.LowerLeft;
                 case "lowercenter": return TextAnchor.LowerCenter;
                 case "lowerright": return TextAnchor.LowerRight;
-                default: Debug.LogWarningFormat("Invalid TextAnchor {0}", value); return TextAnchor.MiddleCenter;
+                default: Debug.LogWarning(string.Format("Invalid TextAnchor {0}", value)); return TextAnchor.MiddleCenter;
             }
         }
 
@@ -267,7 +267,7 @@ namespace Medama.EUGML {
                 case "clamped": return ScrollRect.MovementType.Clamped;
                 case "elastic": return ScrollRect.MovementType.Elastic;
                 case "unrestricted": return ScrollRect.MovementType.Unrestricted;
-                default: Debug.LogWarningFormat("Invalid MovementType {0}", value); return ScrollRect.MovementType.Clamped;
+                default: Debug.LogWarning(string.Format("Invalid MovementType {0}", value)); return ScrollRect.MovementType.Clamped;
             }
         }
 
@@ -287,7 +287,7 @@ namespace Medama.EUGML {
                 case "minsize": return ContentSizeFitter.FitMode.MinSize;
                 case "preferredsize": return ContentSizeFitter.FitMode.PreferredSize;
                 case "unconstrained": return ContentSizeFitter.FitMode.Unconstrained;
-                default: Debug.LogWarningFormat("Invalid FitMode {0}", value); return ContentSizeFitter.FitMode.PreferredSize;
+                default: Debug.LogWarning(string.Format("Invalid FitMode {0}", value)); return ContentSizeFitter.FitMode.PreferredSize;
             }
         }
 
@@ -321,7 +321,7 @@ namespace Medama.EUGML {
                 case "password": return InputField.ContentType.Password;
                 case "pin": return InputField.ContentType.Pin;
                 case "standard": return InputField.ContentType.Standard;
-                default: Debug.LogWarningFormat("Invalid ContentType {0}", value); return InputField.ContentType.Standard;
+                default: Debug.LogWarning(string.Format("Invalid ContentType {0}", value)); return InputField.ContentType.Standard;
             }
         }
     }
