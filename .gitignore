@@ -7,7 +7,10 @@
 /Assets/Plugins/Arbor*
 /Assets/Plugins/UniRx*
 /Assets/Plugins/Renci.SshNet*
+/Assets/Plugins/MySQL*
+/Assets/Plugins/System*
 /Assets/Scripts*
+/Assets/IgnoreScripts*
 
 # Visual Studio 2015 cache directory
 /.vs/
