@@ -12,7 +12,7 @@
       name='TitleMain' sprite='resources://Medama/EUGML/UI001#Header001'
       layout='TopStretch' height='24' top='8' left='8' right='8' spritetype='Simple'>
       <AddNode name='Text' layout='StretchStretch'>
-        <SetText textstring=' [__] TEST SSH LOGIN' color='white' alignment='MiddleLeft' />
+        <SetText textstring=' [__] TEST DATA GRID' color='white' alignment='MiddleLeft' />
       </AddNode>
     </AddNode>
     

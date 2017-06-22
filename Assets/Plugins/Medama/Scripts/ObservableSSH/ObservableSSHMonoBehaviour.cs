@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if MEDAMA_USE_UNIRX && MEDAMA_USE_OBSERVABLE_SSH
+using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -140,3 +141,4 @@ namespace Medama.ObservableSsh
         }
     }
 }
+#endif

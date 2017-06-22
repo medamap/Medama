@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿#if MEDAMA_USE_UNIRX
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
 using Medama.EUGML;
 
-public class samplescene : MonoBehaviour {
+public class sample001 : MonoBehaviour {
 
 	void Start () {
 
@@ -72,3 +73,4 @@ public class samplescene : MonoBehaviour {
 
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿namespace Medama.ObservableSsh
+﻿#if MEDAMA_USE_UNIRX && MEDAMA_USE_OBSERVABLE_SSH
+namespace Medama.ObservableSsh
 {
     public enum ObservableSshStatus
     {
@@ -24,3 +25,4 @@
         public const int buffersize = 1024;
     }
 }
+#endif

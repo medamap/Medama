@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if MEDAMA_USE_UNIRX && MEDAMA_USE_OBSERVABLE_SSH
+using UnityEngine;
 using UnityEngine.UI;
 using Medama.ObservableSsh;
 using Medama.EUGML;
@@ -102,3 +103,4 @@ public class command_keyfile_microcoroutine : MonoBehaviour
     //}
 
 }
+#endif

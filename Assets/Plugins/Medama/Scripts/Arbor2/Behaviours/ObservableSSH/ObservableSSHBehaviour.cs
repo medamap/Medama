@@ -1,10 +1,11 @@
-﻿using System;
+﻿#if MEDAMA_USE_UNIRX && MEDAMA_USE_OBSERVABLE_SSH && MEDAMA_USE_ARBOR2
+using System;
 using UnityEngine;
 using Arbor;
 using UniRx;
 using Medama.ObservableSsh;
 
-namespace Medama.Arbor
+namespace Medama.Arbor2
 {
     public class ObservableSSHBehaviour : StateBehaviour
     {
@@ -123,3 +124,4 @@ namespace Medama.Arbor
         }
     }
 }
+#endif

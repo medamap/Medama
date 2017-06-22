@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System;
+using System.Data;
 using System.Linq;
 using System.Xml.Linq;
 using System.Reflection;
-using UniRx;
 
 namespace Medama.EUGML {
 
@@ -819,6 +819,7 @@ namespace Medama.EUGML {
             this GameObject node,
             string name = "DataGrid",
             List<T> list = null,
+            DataTable datatable = null,
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance,
             LayoutType rowLayout = LayoutType.TopStretch,
             TextAnchor rowChildAlignment = TextAnchor.UpperLeft,
@@ -841,36 +842,69 @@ namespace Medama.EUGML {
 
             var scrollview = datagrid.MedamaUIAddNode(name: "ScrollView", right: 20, bottom: 20, sprite: scrollviewSprite)
                 .MedamaUISetScrollRect(movementType: ScrollRect.MovementType.Clamped)
-                .MedamaUISetMask(showMaskGraphic: true);
+                .MedamaUISetMask(showMaskGraphic: false);
 
             var content = scrollview.MedamaUIAddNode(name: "Content", bottom: 8, right: 8)
                 .MedamaUISetVerticalLayoutGroup()
                 .MedamaUISetContentSizeFitter(horizontalFit: ContentSizeFitter.FitMode.PreferredSize, verticalFit: ContentSizeFitter.FitMode.PreferredSize)
                 .MedamaUIAttachContentToScrollRect();
 
-            var index = 1;
-            foreach (var data in list) {
-                // Header
-                if (index == 1) {
-                    var headerrow = content.MedamaUIAddNode(name: "HeaderRow", layout: rowLayout)
+            if (list != null) {
+
+                var index = 1;
+                foreach (var data in list) {
+                    // Header
+                    if (index == 1) {
+                        var headerrow = content.MedamaUIAddNode(name: "HeaderRow", layout: rowLayout)
+                            .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
+                        foreach (var member in members) {
+                            headerrow.MedamaUIAddNode(name: member.Name, layout: cellLayout, sprite: headerSprite)
+                                .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
+                                .MedamaUIAddNode(name: "Text")
+                                .MedamaUISetText(textstring: member.Name);
+                        }
+                    }
+                    // Data
+                    var datarow = content.MedamaUIAddNode(name: "DataCell" + index.ToString(), layout: cellLayout)
                         .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
                     foreach (var member in members) {
-                        headerrow.MedamaUIAddNode(name: member.Name, layout: cellLayout, sprite: headerSprite)
+                        datarow.MedamaUIAddNode(name: member.Name + index.ToString(), layout: cellLayout, sprite: cellSprite)
                             .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
                             .MedamaUIAddNode(name: "Text")
-                            .MedamaUISetText(textstring: member.Name);
+                            .MedamaUISetText(textstring: member.GetValue(data).ToString());
                     }
+                    index++;
                 }
-                // Data
-                var datarow = content.MedamaUIAddNode(name: "DataCell" + index.ToString(), layout: cellLayout)
-                    .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
-                foreach (var member in members) {
-                    datarow.MedamaUIAddNode(name: member.Name + index.ToString(), layout: cellLayout, sprite: cellSprite)
-                        .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
-                        .MedamaUIAddNode(name: "Text")
-                        .MedamaUISetText(textstring: member.GetValue(data).ToString());
+
+            }
+
+            if (datatable != null) {
+
+                var index = 1;
+                foreach (DataRow row in datatable.Rows) {
+                    // Header
+                    if (index == 1) {
+                        var headerrow = content.MedamaUIAddNode(name: "HeaderRow", layout: rowLayout)
+                            .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
+                        foreach (DataColumn column in datatable.Columns) {
+                            headerrow.MedamaUIAddNode(name: column.ColumnName, layout: cellLayout, sprite: headerSprite)
+                                .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
+                                .MedamaUIAddNode(name: "Text")
+                                .MedamaUISetText(textstring: column.ColumnName);
+                        }
+                    }
+                    // Data
+                    var datarow = content.MedamaUIAddNode(name: "DataCell" + index.ToString(), layout: cellLayout)
+                        .MedamaUISetHorizontalLayoutGroup(childAlignment: rowChildAlignment);
+                    foreach (DataColumn column in datatable.Columns) {
+                        datarow.MedamaUIAddNode(name: column.ColumnName + index.ToString(), layout: cellLayout, sprite: cellSprite)
+                            .MedamaUISetLayoutElement(minWidth: minWidth, minHeight: minHeight)
+                            .MedamaUIAddNode(name: "Text")
+                            .MedamaUISetText(textstring: row[column.ColumnName].ToString());
+                    }
+                    index++;
                 }
-                index++;
+
             }
 
             var vscroll_bar = datagrid.MedamaUIAddNode(name: "VScrollBar", layout: LayoutType.StretchRight, pivot: LayoutType.BottomRight, width: 20, bottom: 20, sprite: vscrollbarSprite)

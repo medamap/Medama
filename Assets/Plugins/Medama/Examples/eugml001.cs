@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Medama.EUGML;
 
-public class eugml : MonoBehaviour {
+public class eugml001 : MonoBehaviour {
     void Start () {
         // Create UI from XML.
         var dc = EUGML.MedamaUIParseXml(@"<?xml version='1.0'?>
