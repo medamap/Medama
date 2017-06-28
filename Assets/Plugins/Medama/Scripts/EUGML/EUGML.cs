@@ -303,7 +303,7 @@ namespace Medama.EUGML {
                     else if (pi.Value.ParameterType == typeof(double) && double.TryParse(value, out dValue)) { parameters[index] = dValue; } // double
                     else if (pi.Value.ParameterType == typeof(string)) { parameters[index] = value; } // string
                     else if (pi.Value.ParameterType == typeof(Vector2)) { parameters[index] = value.ToVector2(); } // Vector2
-                    else if (pi.Value.ParameterType == typeof(Vector3)) { parameters[index] = Vector3.zero; } // Vector3
+                    else if (pi.Value.ParameterType == typeof(Vector3)) { parameters[index] = value.ToVector3(); } // Vector3
                     else if (pi.Value.ParameterType == typeof(Texture2D)) { parameters[index] = null; } // Texture2D
                     else if (pi.Value.ParameterType == typeof(Texture3D)) { parameters[index] = null; } // Texture3D
                     else if (pi.Value.ParameterType == typeof(Sprite)) { parameters[index] = MedamaUILoadSprite(value); } // Sprite
@@ -444,6 +444,7 @@ namespace Medama.EUGML {
             string sprite = "",
             Image.Type spritetype = Image.Type.Sliced,
             LayoutType pivot = LayoutType.NoUse,
+            string directpivot = "",
             bool active = true
         ) {
             Vector2 anchorMin = Vector2.zero;
@@ -479,6 +480,7 @@ namespace Medama.EUGML {
                 case LayoutType.BottomLeft: pivot_set = bottom_left; break;
                 case LayoutType.BottomCenter: pivot_set = bottom_center; break;
                 case LayoutType.BottomRight: pivot_set = bottom_right; break;
+                case LayoutType.NoUse: pivot_set = (!string.IsNullOrEmpty(directpivot)) ? directpivot.ToVector2() : pivot_set; break;
             }
 
             var newnode = string.IsNullOrEmpty(sprite)
@@ -712,6 +714,7 @@ namespace Medama.EUGML {
         /// </summary>
         public static GameObject MedamaUISetInputField(
             this GameObject node,
+            string name = "Text",
             string textPlaceholder = "",
             Color? textColor = null,
             Color? placeHolderColor = null,
@@ -724,7 +727,7 @@ namespace Medama.EUGML {
         ) {
             var inputField = node.GetComponent<InputField>() ?? node.AddComponent<InputField>();
 
-            var text = node.MedamaUIAddNode("Text", LayoutType.StretchStretch, 0, 0, top, bottom, left, right, "", Image.Type.Simple)
+            var text = node.MedamaUIAddNode(name, LayoutType.StretchStretch, 0, 0, top, bottom, left, right, "", Image.Type.Simple)
                 .MedamaUISetText("", textColor, fontSize, TextAnchor.MiddleLeft)
                 .GetComponent<Text>();
 
@@ -744,12 +747,13 @@ namespace Medama.EUGML {
         /// </summary>
         public static GameObject MedamaUISetButton(
             this GameObject node,
+            string name = "Text",
             string textButton = "",
             Color? colorButton = null
         ) {
             if (node.GetComponent<Button>() == null) node.AddComponent<Button>();
             if (node.GetComponent<Image>() == null) node.AddComponent<Image>();
-            node.MedamaUIAddNode("Text", LayoutType.StretchStretch, 0, 0, 0, 0, 0, 0, "", Image.Type.Simple)
+            node.MedamaUIAddNode(name, LayoutType.StretchStretch, 0, 0, 0, 0, 0, 0, "", Image.Type.Simple)
                 .MedamaUISetText(textButton, colorButton);
 
             return node;
