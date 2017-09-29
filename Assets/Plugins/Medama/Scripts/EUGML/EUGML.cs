@@ -227,9 +227,7 @@ namespace Medama.EUGML {
         /// <returns></returns>
         public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject gameObject, string xml)
         {
-#pragma warning disable 219, 168
-            var canvas = gameObject.MedamaUIGetCanvas();
-#pragma warning restore 219, 168
+            gameObject.MedamaUIGetCanvas();
             gameObject.MedamaUIGetEventSystem();
 
             var doc = XElement.Parse(xml);
@@ -243,7 +241,8 @@ namespace Medama.EUGML {
         /// ## Create uGUI objects tree from XML
         /// </summary>
         /// <param name="parent"></param>
-        /// <param name="xml"></param>
+        /// <param name="doc"></param>
+        /// <param name="dcGO"></param>
         /// <returns></returns>
         public static Dictionary<int, GameObject> MedamaUIParseXml(this GameObject parent, XElement doc, Dictionary<int, GameObject> dcGO) {
             foreach (var xml_node in doc.Elements()) {
@@ -507,6 +506,58 @@ namespace Medama.EUGML {
             rect.sizeDelta = sizeDelta;
             rect.pivot = pivot;
             return node;
+        }
+
+        /// <summary>
+        /// ## Toggleオブジェクトを作成して指定された親オブジェクトにアタッチする。親オブジェクトが省略されている場合は、Canvasにアタッチする
+        /// ## Create and attach Toggle object to the specified parent object. If parent is omitted, attach to Canvas.
+        /// </summary>
+        public static GameObject MedamaUIAddToggle(
+            this GameObject parent,
+            
+            string name = "Toggle", LayoutType layout = LayoutType.StretchStretch,
+            float width = 0, float height = 0, float top = 0, float bottom = 0, float left = 0, float right = 0,
+            LayoutType pivot = LayoutType.NoUse, string directpivot = "", bool active = true,
+
+            string bName = "Background",
+            float bWidth = 24, float bHeight = 24,
+            string bSprite = "", Image.Type bSpritetype = Image.Type.Sliced,
+
+            string cName = "Checkmark",
+            float cWidth = 12, float cHeight = 12,
+            string cSprite = "", Image.Type cSpritetype = Image.Type.Sliced,
+
+            string lName = "Label",
+            float lWidth = 200, float lHeight = 0, float lTop = 0, float lBottom = 0, float lLeft = 0, float lRight = 0,
+            string textstring = "",
+            Color? color = null,
+            int fontsize = 14,
+            TextAnchor alignment = TextAnchor.MiddleLeft,
+            FontStyle fontStyle = FontStyle.Normal,
+            Font font = null,
+            bool resizeTextForBestFit = false,
+            int resizeTextMinSize = 10,
+            int resizeTextMaxSize = 40,
+            bool supportRichText = true,
+            HorizontalWrapMode horizontalOverflow = HorizontalWrapMode.Wrap,
+            VerticalWrapMode verticalOverflow = VerticalWrapMode.Truncate,
+            int lineSpacing = 1
+        ) {
+            float cLeftRight, cTopBottom;
+            cLeftRight = (bWidth - cWidth) / 2;
+            cTopBottom = (bHeight - cHeight) / 2;
+            lLeft = (lLeft == 0) ? bWidth + 4 : lLeft;
+            lHeight = (lHeight == 0) ? bHeight : lHeight;
+
+            var tNode = parent.MedamaUIAddNode(name: name, layout: layout, width: width, height:height, top: top, bottom: bottom, left: left, right: right, pivot: pivot, directpivot: directpivot, active: active);
+            var bNode = tNode.MedamaUIAddNode(name: bName, layout: LayoutType.TopLeft, width: bWidth, height: bHeight, sprite: bSprite, spritetype: bSpritetype);
+            var cNode = bNode.MedamaUIAddNode(name: cName, layout: LayoutType.TopLeft, width: cWidth, height: cHeight, top: cTopBottom, bottom: cTopBottom, left: cLeftRight, right: cLeftRight, sprite: cSprite, spritetype: cSpritetype);
+            var lNode = tNode.MedamaUIAddNode(name: lName, layout: LayoutType.TopLeft, width: lWidth, height: lHeight, top: lTop, bottom: lBottom, left: lLeft, right: lRight)
+                .MedamaUISetText(textstring: textstring, color: color, fontsize: fontsize, alignment: alignment, fontStyle: fontStyle, font: font, resizeTextForBestFit: resizeTextForBestFit, resizeTextMinSize: resizeTextMinSize, resizeTextMaxSize: resizeTextMaxSize);
+            var toggleComponent = (tNode.GetComponent<Toggle>() == null) ? tNode.AddComponent<Toggle>() : tNode.GetComponent<Toggle>();
+            toggleComponent.targetGraphic = bNode.GetComponent<Graphic>();
+            toggleComponent.graphic = cNode.GetComponent<Graphic>();
+            return tNode;
         }
 
         /// <summary>
