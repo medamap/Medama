@@ -105,7 +105,7 @@ namespace Medama.ObservableSsh
         /// <summary>
         /// Monitor EndOfStream and check match string
         /// </summary>
-        private IObservable<Unit> MonitorEndOfStream() {
+        private UniRx.IObservable<Unit> MonitorEndOfStream() {
             Thread.Sleep(500);
             return Observable.Create<Unit>(observer => {
                 while (loop) {
@@ -120,7 +120,7 @@ namespace Medama.ObservableSsh
         /// <summary>
         /// Read stream of ssh
         /// </summary>
-        IObservable<string> SshReader() {
+        UniRx.IObservable<string> SshReader() {
             return Observable.Create<string>(observer => {
                 Thread.Sleep(300);
                 using (StreamReader reader = new StreamReader(shellStream)) {
@@ -151,7 +151,7 @@ namespace Medama.ObservableSsh
         /// <summary>
         /// Monitor connection status
         /// </summary>
-        IObservable<Unit> CheckConnectionStatus() {
+        UniRx.IObservable<Unit> CheckConnectionStatus() {
             return Observable.Create<Unit>(observer => {
                 Thread.Sleep(300);
                 while (loop) {

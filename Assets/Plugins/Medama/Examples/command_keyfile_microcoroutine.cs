@@ -84,7 +84,7 @@ public class command_keyfile_microcoroutine : MonoBehaviour
                         .statusSubject
                         .Where(status =>
                             status == ObservableSshStatus.EndOfStream &&
-                            ssh.CheckBuffer("]$ ") &&
+                            (ssh.CheckBuffer("]$ ") || ssh.CheckBuffer("]# ")) &&
                             commands.Count > 0)
                         .Subscribe(status => ssh.writeSshSubject.OnNext(commands.Dequeue()));
                 }
