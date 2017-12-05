@@ -27,6 +27,10 @@ namespace Medama.ObservableSsh
         /// read from stream
         /// </summary>
         public Buffer UpdateFromReadStream(StreamReader reader) {
+            var length = buffer.Length - index - 1;
+            if (length == 0) {
+                throw new ObservableSSHException("buffer over flow.");
+            }
             var count_up = reader.Read(buffer, index, buffer.Length - index - 1);
             count += count_up;
             index += count_up;
@@ -53,6 +57,12 @@ namespace Medama.ObservableSsh
 
             // search index of CR LF code (-1 is not found)
             var find = Enumerable.Range(0, count).Where(index => buffer[index] == '\n' || buffer[index] == '\r').Select(i => i + 1).FirstOrDefault() - 1;
+
+            // buffer over flow check
+            if (find == -1 && count == buffer.Length - 1) {
+                throw new ObservableSSHException("buffer full and new line not found.");
+            }
+
             // length of line chars
             var length = find;
 

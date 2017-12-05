@@ -7,6 +7,7 @@ using System.Linq;
 using UniRx;
 
 public class command_thread : MonoBehaviour {
+    public string wait = "]$ ";
     ObservableSSH ssh;
     public Queue<string> commands = new Queue<string>();
 
@@ -67,7 +68,7 @@ public class command_thread : MonoBehaviour {
                         .statusSubject
                         .Where(status =>
                             status == ObservableSshStatus.EndOfStream &&
-                            (ssh.CheckBuffer("]$ ") || ssh.CheckBuffer("]# ")) &&
+                            (ssh.CheckBuffer(wait.Trim() + " ") || ssh.CheckBuffer("]$ ") || ssh.CheckBuffer("]# ")) &&
                             commands.Count > 0)
                         .Subscribe(status => ssh.writeSshSubject.OnNext(commands.Dequeue()));
                 }

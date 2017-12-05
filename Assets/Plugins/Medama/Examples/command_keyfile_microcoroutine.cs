@@ -8,6 +8,7 @@ using UniRx;
 
 public class command_keyfile_microcoroutine : MonoBehaviour
 {
+    public string wait = "]$ ";
     ObservableSSHMonoBehaviour ssh;
     public Queue<string> commands = new Queue<string>();
 
@@ -84,7 +85,7 @@ public class command_keyfile_microcoroutine : MonoBehaviour
                         .statusSubject
                         .Where(status =>
                             status == ObservableSshStatus.EndOfStream &&
-                            (ssh.CheckBuffer("]$ ") || ssh.CheckBuffer("]# ")) &&
+                            (ssh.CheckBuffer(wait.Trim() + " ") || ssh.CheckBuffer("]$ ") || ssh.CheckBuffer("]# ")) &&
                             commands.Count > 0)
                         .Subscribe(status => ssh.writeSshSubject.OnNext(commands.Dequeue()));
                 }

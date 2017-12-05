@@ -117,6 +117,7 @@ namespace Medama.ObservableSsh
             }
             statusSubject.OnNext(ObservableSshStatus.End);
             statusSubject.OnCompleted();
+            Destroy(this);
         }
 
         /// <summary>

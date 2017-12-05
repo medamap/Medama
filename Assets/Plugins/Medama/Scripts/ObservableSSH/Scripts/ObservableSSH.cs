@@ -158,6 +158,8 @@ namespace Medama.ObservableSsh
                     Thread.Sleep(1000);
                 }
                 statusSubject.OnNext(ObservableSshStatus.End);
+                statusSubject.OnCompleted();
+                Dispose();
                 return Disposable.Create(() => { });
             })
             .SubscribeOn(Scheduler.ThreadPool);
